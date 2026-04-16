@@ -871,50 +871,47 @@ function renderHabits(){
 
     return `
       <div class="card">
-        
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:600">${h.name}</div>
 
-            <div class="days-ago">
-              🔥 ${calcStreak(h.dates)} dias seguidos
-            </div>
+  <div style="display:flex;justify-content:space-between;gap:16px;align-items:center">
 
-            <div class="days-ago">
-              📊 ${consistency}% de consistência
-            </div>
+    <!-- ESQUERDA -->
+    <div style="flex:1">
+      <div style="font-weight:600">${h.name}</div>
 
-            <div class="days-ago">
-              📆 ${total} dias praticados
-            </div>
-          </div>
+      <div class="days-ago">🔥 ${calcStreak(h.dates)} dias seguidos</div>
+      <div class="days-ago">📊 ${consistency}% de consistência</div>
+      <div class="days-ago">📆 ${total} dias praticados</div>
+    </div>
 
-          <div style="display:flex;gap:6px;align-items:center">
-            <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
-              ${h.dates.includes(today()) ? '✔️' : 'Marcar'}
-            </button>
+    <!-- CENTRO (SEMANA) -->
+    <div>
+      ${renderWeek(h.dates)}
+    </div>
 
-            <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
-          </div>
-        </div>
+    <!-- DIREITA (AÇÕES) -->
+    <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
 
-        <!-- 📅 marcar data antiga -->
-        <div style="display:flex;gap:6px;align-items:center;margin-top:10px">
-          <input type="date" id="habit-date-${i}" 
-            value="${today()}"
-            style="width:130px;font-size:11px;padding:4px">
+      <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
+        ${h.dates.includes(today()) ? '✔️' : 'Marcar'}
+      </button>
 
-          <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">
-            Marcar data
-          </button>
-        </div>
+      <div style="display:flex;gap:6px">
+        <input type="date" id="habit-date-${i}" 
+          value="${today()}"
+          style="width:120px;font-size:11px;padding:4px">
 
-        <!-- 📊 semana -->
-        <div style="margin-top:10px">
-          ${renderWeek(h.dates)}
-        </div>
-
+        <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">
+          +
+        </button>
       </div>
+
+      <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
+
+    </div>
+
+  </div>
+
+</div>
     `;
 
   }).join('');

@@ -461,9 +461,10 @@ async function updateInDB(table, dbid, item) {
 async function loadAll() {
   setSyncStatus('loading');
   await Promise.all([
-    loadFromDB('workouts'), loadFromDB('transactions'), loadFromDB('tasks'),
-    loadFromDB('mental'), loadFromDB('contacts'), loadFromDB('events'), loadFromDB('notes')
-  ]);
+  loadFromDB('workouts'), loadFromDB('transactions'), loadFromDB('tasks'),
+  loadFromDB('mental'), loadFromDB('contacts'), loadFromDB('events'), loadFromDB('notes'),
+  loadFromDB('habits')
+]);
   setSyncStatus('ok');
   render();
 }
@@ -475,7 +476,7 @@ const fmtMoney = v => 'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigi
 const colors = ['#7c3aed','#0d9488','#d97706','#dc2626','#2563eb','#db2777'];
 const initials = n => n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
 
-const PAGE_IDS = ['fitness','finance','work','mental','social','agenda','notes'];
+const PAGE_IDS = ['fitness','finance','work','mental','social','agenda','notes','habits'];
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -753,7 +754,31 @@ function renderNotes(){
       <div style="font-size:11px;color:#555;margin-top:6px">${fmt(n.date)}</div>
     </div>`).join('');
 }
+// ========== HÁBITOS ==========
 
+async function addHabit(){
+  ...
+}
+
+async function toggleHabit(dbid, i){
+  ...
+}
+
+function calcStreak(dates){
+  ...
+}
+
+function renderWeek(dates){
+  ...
+}
+
+function renderHabits(){
+  ...
+}
+
+
+// ========== DELETE ==========
+async function delItem(table, dbid, i){
 // ========== DELETE ==========
 async function delItem(table, dbid, i){
   await deleteFromDB(table, dbid);
@@ -763,7 +788,7 @@ async function delItem(table, dbid, i){
 
 function render(){
   renderFitness(); renderFinance(); renderWork(); renderMental();
-  renderSocial(); renderAgenda(); renderNotes();
+  renderSocial(); renderAgenda(); renderNotes(); renderHabits();
 }
 
 // ========== AUTH ==========

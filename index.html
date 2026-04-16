@@ -669,9 +669,20 @@ function render(){
   renderSocial(); renderAgenda(); renderNotes();
 }
 
-// Inicia carregando tudo do banco
-loadAll();
-  async function signUp() {
+```html
+// ========== AUTH (LOGIN) ==========
+
+// Escuta mudanças de login/logout automaticamente
+sb.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    loadAll();
+    document.getElementById('auth').style.display = 'none';
+  } else {
+    document.getElementById('auth').style.display = 'block';
+  }
+});
+
+async function signUp() {
   const email = document.getElementById('auth-email').value
   const password = document.getElementById('auth-pass').value
 
@@ -690,7 +701,6 @@ async function signIn() {
   if (error) alert(error.message)
   else {
     alert("Logado!")
-    loadAll()
   }
 }
 
@@ -698,7 +708,5 @@ async function logout() {
   await sb.auth.signOut()
   alert("Saiu!")
 }
+```
 
-</script>
-</body>
-</html>

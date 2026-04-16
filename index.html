@@ -834,6 +834,7 @@ function renderHabits(){
 
   document.getElementById('habits-list').innerHTML = list.map((h,i)=>`
     <div class="card">
+      
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <div style="font-weight:600">${h.name}</div>
@@ -842,7 +843,7 @@ function renderHabits(){
 
         <div style="display:flex;gap:6px;align-items:center">
           <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
-            ${h.dates.includes(today()) ? '✔️' : 'Hoje'}
+            ${h.dates.includes(today()) ? '✔️' : 'Marcar'}
           </button>
 
           <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
@@ -862,6 +863,7 @@ function renderHabits(){
       <div style="margin-top:10px">
         ${renderWeek(h.dates)}
       </div>
+
     </div>
   `).join('');
 }

@@ -669,7 +669,6 @@ function render(){
   renderSocial(); renderAgenda(); renderNotes();
 }
 
-```html
 // ========== AUTH (LOGIN) ==========
 
 // Escuta mudanças de login/logout automaticamente
@@ -699,14 +698,12 @@ async function signIn() {
   const { error } = await sb.auth.signInWithPassword({ email, password })
 
   if (error) alert(error.message)
-  else {
-    alert("Logado!")
-  }
+  else alert("Logado!")
 }
 
 async function logout() {
   await sb.auth.signOut()
   alert("Saiu!")
 }
-```
 
+</script>

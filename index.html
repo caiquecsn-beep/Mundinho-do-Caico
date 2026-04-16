@@ -673,11 +673,16 @@ function render(){
 
 // Escuta mudanças de login/logout automaticamente
 sb.auth.onAuthStateChange((event, session) => {
+  const authEl = document.getElementById('auth');
+  const appEl = document.getElementById('app-content');
+
   if (session) {
+    authEl.style.display = 'none';
+    appEl.style.display = 'flex';
     loadAll();
-    document.getElementById('auth').style.display = 'none';
   } else {
-    document.getElementById('auth').style.display = 'block';
+    authEl.style.display = 'block';
+    appEl.style.display = 'none';
   }
 });
 

@@ -872,12 +872,16 @@ function renderHabits(){
     return `
       <div class="card">
 
-  <div style="display:flex;justify-content:space-between;gap:20px">
+  <div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start">
 
-    <!-- ESQUERDA (CALENDÁRIO) -->
+    <!-- ESQUERDA -->
     <div style="flex:1">
 
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+      <div style="font-weight:600;margin-bottom:8px">
+        ${h.name}
+      </div>
+
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px">
         <input type="date" id="habit-date-${i}" 
           value="${today()}"
           style="width:130px;font-size:11px;padding:4px">
@@ -891,17 +895,22 @@ function renderHabits(){
 
     </div>
 
-    <!-- DIREITA (STATS + AÇÃO) -->
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;min-width:140px">
+    <!-- DIREITA (MAIS CENTRALIZADA) -->
+    <div style="
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      padding-right:20px;
+      min-width:140px;
+      align-items:flex-start;
+    ">
 
-      <div style="font-weight:600">${h.name}</div>
-
-      <div class="days-ago">🔥 ${calcStreak(h.dates)} dias</div>
-      <div class="days-ago">📊 ${consistency}%</div>
-      <div class="days-ago">📆 ${total} dias</div>
+      <div class="days-ago">🔥 ${calcStreak(h.dates)} dias seguidos</div>
+      <div class="days-ago">📊 ${consistency}% de consistência</div>
+      <div class="days-ago">📆 ${total} dias praticados</div>
 
       <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
-        ${h.dates.includes(today()) ? '✔️' : 'Hoje'}
+        ${h.dates.includes(today()) ? '✔️ Hoje' : 'Marcar hoje'}
       </button>
 
       <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>

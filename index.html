@@ -831,6 +831,11 @@ function renderWeek(dates){
 
 function renderHabits(){
   const list = cache.habits;
+  const total = h.dates.length;
+  const firstDate = h.dates.length ? [...h.dates].sort()[0] : null;
+const daysSinceStart = firstDate 
+  ? Math.floor((new Date() - new Date(firstDate)) / 864e5) + 1 
+  : 0;
 
   document.getElementById('habits-list').innerHTML = list.map((h,i)=>`
     <div class="card">
@@ -838,8 +843,9 @@ function renderHabits(){
       <div style="display:flex;justify-content:space-between;align-items:center">
         <div>
           <div style="font-weight:600">${h.name}</div>
-          <div class="days-ago">🔥 ${calcStreak(h.dates)} dias seguidos</div>
-        </div>
+         <div class="days-ago">
+  🔥 ${calcStreak(h.dates)} dias seguidos · ✅ ${total} dias no total
+</div>
 
         <div style="display:flex;gap:6px;align-items:center">
           <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">

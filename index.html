@@ -842,25 +842,28 @@ function renderHabits(){
 
         <div style="display:flex;gap:6px;align-items:center">
           <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
-            ${h.dates.includes(today()) ? '✔️' : 'Marcar'}
+            ${h.dates.includes(today()) ? '✔️' : 'Hoje'}
           </button>
 
           <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
         </div>
       </div>
 
-      <div style="display:flex;gap:6px;align-items:center">
-  
-  <input type="date" id="habit-date-${i}" 
-    value="${today()}"
-    style="width:130px;font-size:11px;padding:4px">
+      <div style="display:flex;gap:6px;align-items:center;margin-top:10px">
+        <input type="date" id="habit-date-${i}" 
+          value="${today()}"
+          style="width:130px;font-size:11px;padding:4px">
 
-  <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">
-    Marcar
-  </button>
+        <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">
+          Marcar data
+        </button>
+      </div>
 
-  <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
-</div>
+      <div style="margin-top:10px">
+        ${renderWeek(h.dates)}
+      </div>
+    </div>
+  `).join('');
 }
 // ========== DELETE ==========
 async function delItem(table, dbid, i){

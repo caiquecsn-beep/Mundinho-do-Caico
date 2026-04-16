@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Life OS</title>
+<title>Mundinho do Caico</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#0f0f13;color:#e8e8f0;min-height:100vh;font-size:15px}
@@ -47,8 +48,6 @@ label{font-size:12px;color:#888;display:block;margin-bottom:4px}
 .badge-purple{background:#3b0764;color:#d8b4fe}
 .mood-btn{padding:8px 12px;border-radius:8px;border:1px solid #2a2a35;background:#0f0f13;cursor:pointer;font-size:18px;transition:all .2s}
 .mood-btn:hover,.mood-btn.active{border-color:#7c3aed;background:#1e1b2e}
-.progress-bar{background:#1e1e28;border-radius:4px;height:8px;overflow:hidden}
-.progress-fill{height:100%;border-radius:4px;background:#7c3aed;transition:width .3s}
 .contact-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
 .days-ago{font-size:11px;color:#888}
 .event-dot{width:10px;height:10px;border-radius:50%;background:#7c3aed;flex-shrink:0}
@@ -56,6 +55,10 @@ label{font-size:12px;color:#888;display:block;margin-bottom:4px}
 .delete-btn{background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
 .delete-btn:hover{color:#f87171;background:#1e1e28}
 select option{background:#1a1a22}
+#sync-status{font-size:11px;padding:4px 10px;border-radius:20px;margin-left:auto;margin-right:8px;flex-shrink:0;align-self:center}
+.sync-ok{background:#14532d;color:#86efac}
+.sync-err{background:#7f1d1d;color:#fca5a5}
+.sync-loading{background:#1e3a5f;color:#93c5fd}
 </style>
 </head>
 <body>
@@ -69,6 +72,7 @@ select option{background:#1a1a22}
   <div class="tab" onclick="showPage('social')"><span class="icon">👥</span>Rede Social</div>
   <div class="tab" onclick="showPage('agenda')"><span class="icon">📅</span>Agenda</div>
   <div class="tab" onclick="showPage('notes')"><span class="icon">📝</span>Notas</div>
+  <span id="sync-status" class="sync-loading">⏳ Carregando...</span>
 </nav>
 
 <!-- FITNESS -->
@@ -249,11 +253,90 @@ select option{background:#1a1a22}
 </div>
 
 <script>
-const S = {
-  get(k){try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}},
-  set(k,v){localStorage.setItem(k,JSON.stringify(v))}
+// ========== SUPABASE ==========
+const { createClient } = supabase;
+const sb = createClient(
+  'https://tflhckvukijjpimiwmla.supabase.co',
+  'sb_publishable_e6FHgaSx2tQyyYPqEH7jnw_AZN-NfuT'
+);
+
+// Cache local pra app funcionar rápido
+const cache = {
+  workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[]
 };
 
+function setSyncStatus(status) {
+  const el = document.getElementById('sync-status');
+  if(status === 'ok') { el.textContent = '☁️ Salvo'; el.className = 'sync-ok'; }
+  else if(status === 'err') { el.textContent = '❌ Erro'; el.className = 'sync-err'; }
+  else { el.textContent = '⏳ Salvando...'; el.className = 'sync-loading'; }
+}
+
+// Carrega dados do Supabase
+async function loadFromDB(table) {
+  try {
+    const { data, error } = await sb.from(table).select('*').order('created_at', { ascending: false });
+    if(error) throw error;
+    cache[table] = data.map(row => ({ ...JSON.parse(row.data), _dbid: row.id }));
+    return cache[table];
+  } catch(e) {
+    console.error('Erro ao carregar ' + table, e);
+    return cache[table];
+  }
+}
+
+// Salva no Supabase
+async function saveToDB(table, item) {
+  setSyncStatus('loading');
+  try {
+    const { data, error } = await sb.from(table).insert([{ data: JSON.stringify(item) }]).select();
+    if(error) throw error;
+    setSyncStatus('ok');
+    return data[0].id;
+  } catch(e) {
+    console.error('Erro ao salvar', e);
+    setSyncStatus('err');
+    return null;
+  }
+}
+
+// Deleta do Supabase
+async function deleteFromDB(table, dbid) {
+  setSyncStatus('loading');
+  try {
+    const { error } = await sb.from(table).delete().eq('id', dbid);
+    if(error) throw error;
+    setSyncStatus('ok');
+  } catch(e) {
+    console.error('Erro ao deletar', e);
+    setSyncStatus('err');
+  }
+}
+
+// Atualiza no Supabase
+async function updateInDB(table, dbid, item) {
+  setSyncStatus('loading');
+  try {
+    const { error } = await sb.from(table).update({ data: JSON.stringify(item) }).eq('id', dbid);
+    if(error) throw error;
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('err');
+  }
+}
+
+// Carrega tudo ao iniciar
+async function loadAll() {
+  setSyncStatus('loading');
+  await Promise.all([
+    loadFromDB('workouts'), loadFromDB('transactions'), loadFromDB('tasks'),
+    loadFromDB('mental'), loadFromDB('contacts'), loadFromDB('events'), loadFromDB('notes')
+  ]);
+  setSyncStatus('ok');
+  render();
+}
+
+// ========== HELPERS ==========
 const today = () => new Date().toISOString().split('T')[0];
 const fmt = d => d ? new Date(d+'T12:00:00').toLocaleDateString('pt-BR') : '';
 const fmtMoney = v => 'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2});
@@ -268,24 +351,25 @@ function showPage(id){
   render();
 }
 
-// set today on date inputs
 document.querySelectorAll('input[type=date]').forEach(i=>i.value=today());
 
-// ---- FITNESS ----
-function addWorkout(){
+// ========== FITNESS ==========
+async function addWorkout(){
   const d={date:document.getElementById('fit-date').value,type:document.getElementById('fit-type').value,
     dur:document.getElementById('fit-dur').value,weight:document.getElementById('fit-weight').value,
     notes:document.getElementById('fit-notes').value};
   if(!d.date)return;
-  const list=S.get('workouts');list.unshift(d);S.set('workouts',list);
+  const dbid = await saveToDB('workouts', d);
+  if(dbid) { d._dbid = dbid; cache.workouts.unshift(d); }
   document.getElementById('fit-notes').value='';
   document.getElementById('fit-dur').value='';
   document.getElementById('fit-weight').value='';
   renderFitness();
 }
+
 function renderFitness(){
-  const list=S.get('workouts');
-  const now=new Date(),weekAgo=new Date(now-7*864e5);
+  const list = cache.workouts;
+  const now=new Date(), weekAgo=new Date(now-7*864e5);
   const thisWeek=list.filter(w=>new Date(w.date)>=weekAgo).length;
   document.getElementById('fit-total').textContent=list.length;
   document.getElementById('fit-week').textContent=thisWeek;
@@ -297,8 +381,7 @@ function renderFitness(){
     if(diff<=1){streak++;prev=w.date;}else break;
   }
   document.getElementById('fit-streak').textContent=streak;
-  const el=document.getElementById('fit-list');
-  el.innerHTML=list.map((w,i)=>`
+  document.getElementById('fit-list').innerHTML=list.map((w,i)=>`
     <div class="item-row">
       <div class="event-dot"></div>
       <div style="flex:1">
@@ -306,23 +389,25 @@ function renderFitness(){
         <div class="days-ago">${fmt(w.date)}${w.dur?' · '+w.dur+'min':''}${w.weight?' · '+w.weight+'kg':''}</div>
         ${w.notes?`<div style="font-size:12px;color:#666;margin-top:2px">${w.notes}</div>`:''}
       </div>
-      <button class="delete-btn" onclick="del('workouts',${i})">✕</button>
+      <button class="delete-btn" onclick="delItem('workouts','${w._dbid}',${i})">✕</button>
     </div>`).join('');
 }
 
-// ---- FINANCE ----
-function addTransaction(){
+// ========== FINANÇAS ==========
+async function addTransaction(){
   const d={type:document.getElementById('fin-type').value,val:parseFloat(document.getElementById('fin-val').value)||0,
     cat:document.getElementById('fin-cat').value,date:document.getElementById('fin-date').value,
     desc:document.getElementById('fin-desc').value};
   if(!d.val)return;
-  const list=S.get('transactions');list.unshift(d);S.set('transactions',list);
+  const dbid = await saveToDB('transactions', d);
+  if(dbid) { d._dbid = dbid; cache.transactions.unshift(d); }
   document.getElementById('fin-val').value='';
   document.getElementById('fin-desc').value='';
   renderFinance();
 }
+
 function renderFinance(){
-  const list=S.get('transactions');
+  const list = cache.transactions;
   let inc=0,exp=0;
   list.forEach(t=>t.type==='income'?inc+=t.val:exp+=t.val);
   document.getElementById('fin-inc').textContent=fmtMoney(inc);
@@ -339,65 +424,73 @@ function renderFinance(){
         <div class="days-ago">${fmt(t.date)} · ${t.cat}</div>
       </div>
       <span style="font-weight:600;color:${t.type==='income'?'#86efac':'#fca5a5'}">${t.type==='income'?'+':'-'}${fmtMoney(t.val)}</span>
-      <button class="delete-btn" onclick="del('transactions',${i})">✕</button>
+      <button class="delete-btn" onclick="delItem('transactions','${t._dbid}',${i})">✕</button>
     </div>`).join('');
 }
 
-// ---- WORK ----
-function addTask(){
+// ========== TRABALHO ==========
+async function addTask(){
   const d={task:document.getElementById('work-task').value,proj:document.getElementById('work-proj').value,
     due:document.getElementById('work-due').value,pri:document.getElementById('work-pri').value,done:false};
   if(!d.task)return;
-  const list=S.get('tasks');list.unshift(d);S.set('tasks',list);
+  const dbid = await saveToDB('tasks', d);
+  if(dbid) { d._dbid = dbid; cache.tasks.unshift(d); }
   document.getElementById('work-task').value='';
   document.getElementById('work-proj').value='';
   renderWork();
 }
-function toggleTask(i){
-  const list=S.get('tasks');list[i].done=!list[i].done;S.set('tasks',list);renderWork();
+
+async function toggleTask(dbid, i){
+  cache.tasks[i].done = !cache.tasks[i].done;
+  await updateInDB('tasks', dbid, cache.tasks[i]);
+  renderWork();
 }
+
 function renderWork(){
-  const list=S.get('tasks');
+  const list = cache.tasks;
   const priColor={high:'badge-red',mid:'badge-yellow',low:'badge-green'};
   const priLabel={high:'Alta',mid:'Média',low:'Baixa'};
-  const open=list.filter(t=>!t.done),done=list.filter(t=>t.done);
+  const open=list.filter(t=>!t.done), done=list.filter(t=>t.done);
   document.getElementById('work-open').textContent=open.length;
   document.getElementById('work-done').textContent=done.length;
-  const renderTasks=(items,offset)=>items.map((t,i)=>{
+  const renderTasks=items=>items.map(t=>{
     const idx=list.indexOf(t);
-    return`<div class="item-row">
-      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask(${idx})" style="width:16px;flex-shrink:0">
+    return `<div class="item-row">
+      <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t._dbid}',${idx})" style="width:16px;flex-shrink:0">
       <div style="flex:1;${t.done?'opacity:.5':''}">
         <div style="font-size:14px;font-weight:500">${t.task}</div>
         <div class="days-ago">${t.proj||''}${t.due?' · Prazo: '+fmt(t.due):''}</div>
       </div>
       <span class="badge ${priColor[t.pri]}">${priLabel[t.pri]}</span>
-      <button class="delete-btn" onclick="del('tasks',${idx})">✕</button>
+      <button class="delete-btn" onclick="delItem('tasks','${t._dbid}',${idx})">✕</button>
     </div>`;
   }).join('');
   document.getElementById('work-list-open').innerHTML=renderTasks(open);
   document.getElementById('work-list-done').innerHTML=renderTasks(done);
 }
 
-// ---- MENTAL ----
+// ========== MENTAL ==========
 let selectedMood='';
 function selectMood(el,mood){
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');selectedMood=mood;
+  el.classList.add('active'); selectedMood=mood;
 }
-function saveMentalEntry(){
+
+async function saveMentalEntry(){
   const d={date:today(),mood:selectedMood,entry:document.getElementById('mental-entry').value,
     grat:document.getElementById('mental-grat').value};
   if(!d.mood&&!d.entry)return;
-  const list=S.get('mental');list.unshift(d);S.set('mental',list);
+  const dbid = await saveToDB('mental', d);
+  if(dbid) { d._dbid = dbid; cache.mental.unshift(d); }
   document.getElementById('mental-entry').value='';
   document.getElementById('mental-grat').value='';
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
   selectedMood='';
   renderMental();
 }
+
 function renderMental(){
-  const list=S.get('mental');
+  const list = cache.mental;
   document.getElementById('mental-list').innerHTML=list.map((e,i)=>`
     <div class="card" style="margin-bottom:8px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
@@ -407,7 +500,7 @@ function renderMental(){
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <span class="days-ago">${fmt(e.date)}</span>
-          <button class="delete-btn" onclick="del('mental',${i})">✕</button>
+          <button class="delete-btn" onclick="delItem('mental','${e._dbid}',${i})">✕</button>
         </div>
       </div>
       ${e.entry?`<p style="font-size:13px;color:#ccc;margin-bottom:6px">${e.entry}</p>`:''}
@@ -415,30 +508,35 @@ function renderMental(){
     </div>`).join('');
 }
 
-// ---- SOCIAL ----
-function addContact(){
+// ========== SOCIAL ==========
+async function addContact(){
   const d={name:document.getElementById('soc-name').value,rel:document.getElementById('soc-rel').value,
     last:document.getElementById('soc-last').value,notes:document.getElementById('soc-notes').value};
   if(!d.name)return;
-  const list=S.get('contacts');list.push(d);S.set('contacts',list);
+  const dbid = await saveToDB('contacts', d);
+  if(dbid) { d._dbid = dbid; cache.contacts.push(d); }
   document.getElementById('soc-name').value='';
   document.getElementById('soc-notes').value='';
   renderSocial();
 }
-function updateLastContact(i){
-  const list=S.get('contacts');list[i].last=today();S.set('contacts',list);renderSocial();
+
+async function updateLastContact(dbid, i){
+  cache.contacts[i].last = today();
+  await updateInDB('contacts', dbid, cache.contacts[i]);
+  renderSocial();
 }
+
 function renderSocial(){
-  const list=S.get('contacts');
+  const list = cache.contacts;
   const now=new Date();
   const daysSince=last=>last?Math.floor((now-new Date(last+'T12:00:00'))/864e5):999;
-  const alertList=list.filter((c,i)=>{c._i=i;return daysSince(c.last)>=14});
+  const alertList=list.filter(c=>daysSince(c.last)>=14);
   const renderContact=(c,i)=>{
     const ds=daysSince(c.last);
     const urgency=ds>=30?'badge-red':ds>=14?'badge-yellow':'badge-green';
     const dsLabel=ds===999?'Nunca':ds===0?'Hoje':ds===1?'Ontem':ds+'d atrás';
-    const col=colors[list.indexOf(c)%colors.length];
-    return`<div class="item-row">
+    const col=colors[i%colors.length];
+    return `<div class="item-row">
       <div class="contact-avatar" style="background:${col}22;color:${col}">${initials(c.name)}</div>
       <div style="flex:1">
         <div style="font-size:14px;font-weight:500">${c.name}</div>
@@ -446,28 +544,32 @@ function renderSocial(){
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         <span class="badge ${urgency}">${dsLabel}</span>
-        <button class="btn btn-ghost btn-sm" onclick="updateLastContact(${list.indexOf(c)})">Conversei</button>
+        <button class="btn btn-ghost btn-sm" onclick="updateLastContact('${c._dbid}',${i})">Conversei</button>
       </div>
-      <button class="delete-btn" onclick="del('contacts',${list.indexOf(c)})">✕</button>
+      <button class="delete-btn" onclick="delItem('contacts','${c._dbid}',${i})">✕</button>
     </div>`;
   };
-  document.getElementById('soc-alert-list').innerHTML=alertList.length?alertList.map(c=>renderContact(c,c._i)).join(''):'<div style="font-size:13px;color:#555;padding:8px 0">Todos em dia! 🎉</div>';
+  document.getElementById('soc-alert-list').innerHTML=alertList.length
+    ? alertList.map((c)=>renderContact(c,list.indexOf(c))).join('')
+    : '<div style="font-size:13px;color:#555;padding:8px 0">Todos em dia! 🎉</div>';
   document.getElementById('soc-list').innerHTML=list.map((c,i)=>renderContact(c,i)).join('');
 }
 
-// ---- AGENDA ----
-function addEvent(){
+// ========== AGENDA ==========
+async function addEvent(){
   const d={title:document.getElementById('ag-title').value,date:document.getElementById('ag-date').value,
     time:document.getElementById('ag-time').value,cat:document.getElementById('ag-cat').value,
     loc:document.getElementById('ag-loc').value};
   if(!d.title||!d.date)return;
-  const list=S.get('events');list.push(d);list.sort((a,b)=>a.date.localeCompare(b.date)||(a.time||'').localeCompare(b.time||''));S.set('events',list);
+  const dbid = await saveToDB('events', d);
+  if(dbid) { d._dbid = dbid; cache.events.push(d); cache.events.sort((a,b)=>a.date.localeCompare(b.date)); }
   document.getElementById('ag-title').value='';
   document.getElementById('ag-loc').value='';
   renderAgenda();
 }
+
 function renderAgenda(){
-  const list=S.get('events');
+  const list = cache.events;
   const now=today();
   const catColor={Pessoal:'badge-purple',Saúde:'badge-green',Trabalho:'badge-blue',Social:'badge-yellow',Outro:'badge-red'};
   const renderEv=(e,i)=>`
@@ -478,25 +580,29 @@ function renderAgenda(){
         <div class="days-ago">${fmt(e.date)}${e.time?' às '+e.time:''}${e.loc?' · '+e.loc:''}</div>
       </div>
       <span class="badge ${catColor[e.cat]||'badge-purple'}">${e.cat}</span>
-      <button class="delete-btn" onclick="del('events',${i})">✕</button>
+      <button class="delete-btn" onclick="delItem('events','${e._dbid}',${i})">✕</button>
     </div>`;
-  const upcoming=list.filter(e=>e.date>=now),past=list.filter(e=>e.date<now).reverse();
-  document.getElementById('ag-upcoming').innerHTML=upcoming.length?upcoming.map(renderEv).join(''):'<div style="font-size:13px;color:#555;padding:8px 0">Sem compromissos futuros.</div>';
-  document.getElementById('ag-past').innerHTML=past.slice(0,5).map((e,i)=>renderEv(e,list.indexOf(e))).join('');
+  const upcoming=list.filter(e=>e.date>=now), past=list.filter(e=>e.date<now).reverse();
+  document.getElementById('ag-upcoming').innerHTML=upcoming.length
+    ? upcoming.map((e,i)=>renderEv(e,list.indexOf(e))).join('')
+    : '<div style="font-size:13px;color:#555;padding:8px 0">Sem compromissos futuros.</div>';
+  document.getElementById('ag-past').innerHTML=past.slice(0,5).map((e)=>renderEv(e,list.indexOf(e))).join('');
 }
 
-// ---- NOTES ----
-function addNote(){
+// ========== NOTAS ==========
+async function addNote(){
   const d={title:document.getElementById('note-title').value,body:document.getElementById('note-body').value,
     tag:document.getElementById('note-tag').value,date:today()};
   if(!d.body&&!d.title)return;
-  const list=S.get('notes');list.unshift(d);S.set('notes',list);
+  const dbid = await saveToDB('notes', d);
+  if(dbid) { d._dbid = dbid; cache.notes.unshift(d); }
   document.getElementById('note-title').value='';
   document.getElementById('note-body').value='';
   renderNotes();
 }
+
 function renderNotes(){
-  const list=S.get('notes');
+  const list = cache.notes;
   const tagColor={Ideia:'badge-yellow',Lembrança:'badge-blue',Reflexão:'badge-purple',Plano:'badge-green',Outro:'badge-red'};
   document.getElementById('notes-list').innerHTML=list.map((n,i)=>`
     <div class="card" style="margin-bottom:8px">
@@ -504,7 +610,7 @@ function renderNotes(){
         <div style="font-size:14px;font-weight:500">${n.title||'Sem título'}</div>
         <div style="display:flex;gap:6px;align-items:center">
           <span class="badge ${tagColor[n.tag]||'badge-purple'}">${n.tag}</span>
-          <button class="delete-btn" onclick="del('notes',${i})">✕</button>
+          <button class="delete-btn" onclick="delItem('notes','${n._dbid}',${i})">✕</button>
         </div>
       </div>
       <p style="font-size:13px;color:#bbb;white-space:pre-wrap">${n.body}</p>
@@ -512,15 +618,20 @@ function renderNotes(){
     </div>`).join('');
 }
 
-// ---- GENERIC DELETE ----
-function del(key,i){
-  const list=S.get(key);list.splice(i,1);S.set(key,list);render();
+// ========== DELETE ==========
+async function delItem(table, dbid, i){
+  await deleteFromDB(table, dbid);
+  cache[table].splice(i, 1);
+  render();
 }
 
 function render(){
-  renderFitness();renderFinance();renderWork();renderMental();renderSocial();renderAgenda();renderNotes();
+  renderFitness(); renderFinance(); renderWork(); renderMental();
+  renderSocial(); renderAgenda(); renderNotes();
 }
-render();
+
+// Inicia carregando tudo do banco
+loadAll();
 </script>
 </body>
 </html>

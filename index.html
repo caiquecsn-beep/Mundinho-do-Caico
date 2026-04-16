@@ -805,7 +805,13 @@ async function toggleHabitDate(dbid, i){
   await updateInDB('habits', dbid, habit);
   renderHabits();
 }
+async function confirmDelete(table, dbid, i){
+  const ok = confirm("Tem certeza que deseja apagar este hábito?");
+  
+  if(!ok) return;
 
+  await delItem(table, dbid, i);
+}
 // 🔥 streak (dias seguidos)
 function calcStreak(dates){
   const sorted = [...dates].sort().reverse();
@@ -913,7 +919,7 @@ function renderHabits(){
         ${h.dates.includes(today()) ? '✔️ Hoje' : 'Marcar hoje'}
       </button>
 
-      <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
+      <button class="delete-btn" onclick="confirmDelete('habits','${h._dbid}',${i})">✕</button>
 
     </div>
 

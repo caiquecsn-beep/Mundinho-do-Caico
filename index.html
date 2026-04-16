@@ -930,19 +930,6 @@ function render(){
   renderFitness(); renderFinance(); renderWork(); renderMental();
   renderSocial(); renderAgenda(); renderNotes(); renderHabits();
 }
-async function toggleHabitDate(dbid, i){
-  const input = document.getElementById(`habit-date-${i}`);
-  const selectedDate = input.value;
-  if(!selectedDate) return;
-
-  const habit = cache.habits[i];
-
-  if(habit.dates.includes(selectedDate)){
-    habit.dates = habit.dates.filter(d => d !== selectedDate);
-  } else {
-    habit.dates.push(selectedDate);
-  }
-
   await updateInDB('habits', dbid, habit);
   renderHabits();
 }

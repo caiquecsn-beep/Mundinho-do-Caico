@@ -8,24 +8,76 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#0f0f13;color:#e8e8f0;min-height:100vh;font-size:15px}
-.app{display:flex;flex-direction:column;height:100vh}
-nav{display:flex;overflow-x:auto;background:#18181f;border-bottom:1px solid #2a2a35;padding:0 4px;flex-shrink:0}
-nav::-webkit-scrollbar{height:3px}
-nav::-webkit-scrollbar-thumb{background:#3a3a4a}
-.tab{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 14px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;color:#888;font-size:11px;transition:color .2s}
-.tab .icon{font-size:18px}
-.tab.active{color:#a78bfa;border-bottom-color:#a78bfa}
-.tab:hover{color:#c4b5fd}
-.page{display:none;flex:1;overflow-y:auto;padding:16px}
+
+/* ===== LAYOUT PRINCIPAL ===== */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ===== SIDEBAR ===== */
+.sidebar{
+  width:200px;
+  flex-shrink:0;
+  background:#18181f;
+  border-right:1px solid #2a2a35;
+  display:flex;
+  flex-direction:column;
+  padding:12px 8px;
+  gap:4px;
+  overflow-y:auto;
+}
+.sidebar-logo{
+  font-size:13px;
+  font-weight:700;
+  color:#a78bfa;
+  padding:6px 10px 14px;
+  letter-spacing:.3px;
+  border-bottom:1px solid #2a2a35;
+  margin-bottom:6px;
+}
+.tab{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:9px 10px;
+  cursor:pointer;
+  border-radius:8px;
+  color:#888;
+  font-size:13px;
+  font-weight:500;
+  transition:background .15s,color .15s;
+  white-space:nowrap;
+}
+.tab .icon{font-size:16px;flex-shrink:0}
+.tab.active{color:#a78bfa;background:#1e1b2e}
+.tab:hover:not(.active){color:#c4b5fd;background:#1a1a25}
+.sidebar-bottom{margin-top:auto;padding-top:10px;border-top:1px solid #2a2a35}
+#sync-status{
+  font-size:11px;padding:4px 8px;border-radius:20px;
+  display:block;margin-bottom:8px;text-align:center;
+}
+.sync-ok{background:#14532d;color:#86efac}
+.sync-err{background:#7f1d1d;color:#fca5a5}
+.sync-loading{background:#1e3a5f;color:#93c5fd}
+
+/* ===== CONTEÚDO PRINCIPAL ===== */
+.main-content{
+  flex:1;
+  overflow-y:auto;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ===== PÁGINAS ===== */
+.page{display:none;flex:1;padding:20px}
 .page.active{display:block}
+
+/* ===== COMPONENTES ===== */
 h2{font-size:17px;font-weight:600;margin-bottom:14px;color:#e8e8f0}
 h3{font-size:14px;font-weight:600;margin-bottom:8px;color:#c4b5fd}
 .card{background:#18181f;border:1px solid #2a2a35;border-radius:12px;padding:14px;margin-bottom:12px}
 .btn{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500}
 .btn:hover{background:#6d28d9}
 .btn-sm{padding:5px 10px;font-size:12px}
-.btn-danger{background:#991b1b}
-.btn-danger:hover{background:#7f1d1d}
+.btn-danger{background:#991b1b}.btn-danger:hover{background:#7f1d1d}
 .btn-ghost{background:transparent;border:1px solid #3a3a4a;color:#aaa}
 .btn-ghost:hover{background:#2a2a35;color:#e8e8f0}
 input,select,textarea{background:#0f0f13;border:1px solid #2a2a35;border-radius:8px;padding:8px 10px;color:#e8e8f0;font-size:13px;width:100%;outline:none}
@@ -55,239 +107,267 @@ label{font-size:12px;color:#888;display:block;margin-bottom:4px}
 .delete-btn{background:none;border:none;color:#555;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
 .delete-btn:hover{color:#f87171;background:#1e1e28}
 select option{background:#1a1a22}
-#sync-status{font-size:11px;padding:4px 10px;border-radius:20px;margin-left:auto;margin-right:8px;flex-shrink:0;align-self:center}
-.sync-ok{background:#14532d;color:#86efac}
-.sync-err{background:#7f1d1d;color:#fca5a5}
-.sync-loading{background:#1e3a5f;color:#93c5fd}
+
+/* ===== AUTH ===== */
+#auth{
+  position:fixed;inset:0;z-index:100;
+  background:#0f0f13;
+  display:flex;align-items:center;justify-content:center;
+}
+.auth-box{
+  background:#18181f;border:1px solid #2a2a35;border-radius:16px;
+  padding:28px 24px;width:100%;max-width:340px;
+}
+.auth-box h2{text-align:center;margin-bottom:20px;color:#a78bfa}
+.auth-box .form-row{margin-bottom:12px}
+.auth-actions{display:flex;gap:8px;margin-top:4px}
+.auth-actions .btn{flex:1}
+
+/* ===== MOBILE: sidebar vira bottom nav ===== */
+@media(max-width:600px){
+  .app{flex-direction:column}
+  .sidebar{
+    width:100%;height:auto;flex-direction:row;
+    border-right:none;border-top:1px solid #2a2a35;
+    order:2;padding:4px;gap:0;overflow-x:auto;
+  }
+  .sidebar-logo,.sidebar-bottom{display:none}
+  .tab{flex-direction:column;gap:2px;font-size:10px;padding:8px 10px;flex:1;justify-content:center}
+  .main-content{order:1;overflow-y:auto}
+  .page{padding:14px}
+}
 </style>
 </head>
 <body>
-  <div id="auth" style="padding:12px;background:#18181f;border-bottom:1px solid #2a2a35">
-  <input type="email" id="auth-email" placeholder="Email" style="margin-bottom:6px">
-  <input type="password" id="auth-pass" placeholder="Senha" style="margin-bottom:6px">
-  <div style="display:flex;gap:6px">
-    <button class="btn" onclick="signIn()">Entrar</button>
-    <button class="btn btn-ghost" onclick="signUp()">Criar conta</button>
+
+<!-- AUTH -->
+<div id="auth">
+  <div class="auth-box">
+    <h2>🌍 Mundinho do Caico</h2>
+    <div class="form-row"><label>Email</label><input type="email" id="auth-email" placeholder="seu@email.com"></div>
+    <div class="form-row"><label>Senha</label><input type="password" id="auth-pass" placeholder="••••••••"></div>
+    <div class="auth-actions">
+      <button class="btn" onclick="signIn()">Entrar</button>
+      <button class="btn btn-ghost" onclick="signUp()">Criar conta</button>
+    </div>
   </div>
 </div>
+
+<!-- APP -->
 <div id="app-content" class="app" style="display:none">
-  
-<div class="main-content">
-  <!-- todas as suas páginas aqui -->
-</div>
-  
-<div id="sidebar" class="sidebar">
-  <div class="sidebar-header">
-    <button onclick="toggleSidebar()">☰</button>
-  </div>
 
-  <div class="tab active" onclick="showPage('fitness')">
-    <span class="icon">💪</span><span class="label">Fitness</span>
-  </div>
+  <!-- SIDEBAR LATERAL -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">🌍 Mundinho do Caico</div>
 
-  <div class="tab" onclick="showPage('finance')">
-    <span class="icon">💰</span><span class="label">Finanças</span>
-  </div>
+    <div class="tab active" onclick="showPage('fitness')">
+      <span class="icon">💪</span><span>Fitness</span>
+    </div>
+    <div class="tab" onclick="showPage('finance')">
+      <span class="icon">💰</span><span>Finanças</span>
+    </div>
+    <div class="tab" onclick="showPage('work')">
+      <span class="icon">💼</span><span>Trabalho</span>
+    </div>
+    <div class="tab" onclick="showPage('mental')">
+      <span class="icon">🧘</span><span>Mental</span>
+    </div>
+    <div class="tab" onclick="showPage('social')">
+      <span class="icon">👥</span><span>Social</span>
+    </div>
+    <div class="tab" onclick="showPage('agenda')">
+      <span class="icon">📅</span><span>Agenda</span>
+    </div>
+    <div class="tab" onclick="showPage('notes')">
+      <span class="icon">📝</span><span>Notas</span>
+    </div>
 
-  <div class="tab" onclick="showPage('work')">
-    <span class="icon">💼</span><span class="label">Trabalho</span>
-  </div>
+    <div class="sidebar-bottom">
+      <span id="sync-status" class="sync-ok">☁️ Salvo</span>
+      <button class="btn btn-ghost btn-sm" style="width:100%" onclick="logout()">🚪 Sair</button>
+    </div>
+  </nav>
 
-  <div class="tab" onclick="showPage('mental')">
-    <span class="icon">🧘</span><span class="label">Mental</span>
-  </div>
+  <!-- CONTEÚDO -->
+  <div class="main-content">
 
-  <div class="tab" onclick="showPage('social')">
-    <span class="icon">👥</span><span class="label">Social</span>
-  </div>
-
-  <div class="tab" onclick="showPage('agenda')">
-    <span class="icon">📅</span><span class="label">Agenda</span>
-  </div>
-
-  <div class="tab" onclick="showPage('notes')">
-    <span class="icon">📝</span><span class="label">Notas</span>
-  </div>
-
-  <button class="btn btn-ghost btn-sm" onclick="logout()">🚪 Sair</button>
-</div>
-
-<!-- FITNESS -->
-<div class="page active" id="page-fitness">
-  <h2>💪 Fitness & Saúde</h2>
-  <div class="grid3" id="fit-stats">
-    <div class="stat"><div class="stat-val" id="fit-total">0</div><div class="stat-lbl">Treinos total</div></div>
-    <div class="stat"><div class="stat-val" id="fit-week">0</div><div class="stat-lbl">Essa semana</div></div>
-    <div class="stat"><div class="stat-val" id="fit-streak">0</div><div class="stat-lbl">Sequência dias</div></div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h3>Registrar treino</h3>
-    <div class="grid2">
-      <div class="form-row"><label>Data</label><input type="date" id="fit-date"></div>
-      <div class="form-row"><label>Tipo</label>
-        <select id="fit-type">
-          <option>Musculação</option><option>Corrida</option><option>Ciclismo</option>
-          <option>Natação</option><option>HIIT</option><option>Yoga</option><option>Outro</option>
-        </select>
+    <!-- FITNESS -->
+    <div class="page active" id="page-fitness">
+      <h2>💪 Fitness & Saúde</h2>
+      <div class="grid3" id="fit-stats">
+        <div class="stat"><div class="stat-val" id="fit-total">0</div><div class="stat-lbl">Treinos total</div></div>
+        <div class="stat"><div class="stat-val" id="fit-week">0</div><div class="stat-lbl">Essa semana</div></div>
+        <div class="stat"><div class="stat-val" id="fit-streak">0</div><div class="stat-lbl">Sequência dias</div></div>
       </div>
-    </div>
-    <div class="grid2">
-      <div class="form-row"><label>Duração (min)</label><input type="number" id="fit-dur" placeholder="45"></div>
-      <div class="form-row"><label>Peso corporal (kg)</label><input type="number" id="fit-weight" placeholder="75"></div>
-    </div>
-    <div class="form-row"><label>Observações</label><input type="text" id="fit-notes" placeholder="Peito e tríceps..."></div>
-    <button class="btn" onclick="addWorkout()">Registrar</button>
-  </div>
-  <h3 style="margin-top:4px">Histórico</h3>
-  <div id="fit-list"></div>
-</div>
-
-<!-- FINANÇAS -->
-<div class="page" id="page-finance">
-  <h2>💰 Finanças</h2>
-  <div class="grid3">
-    <div class="stat"><div class="stat-val" id="fin-bal" style="color:#86efac">R$0</div><div class="stat-lbl">Saldo</div></div>
-    <div class="stat"><div class="stat-val" id="fin-inc" style="color:#86efac">R$0</div><div class="stat-lbl">Receitas</div></div>
-    <div class="stat"><div class="stat-val" id="fin-exp" style="color:#fca5a5">R$0</div><div class="stat-lbl">Despesas</div></div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h3>Nova transação</h3>
-    <div class="grid2">
-      <div class="form-row"><label>Tipo</label>
-        <select id="fin-type"><option value="income">Receita</option><option value="expense">Despesa</option></select>
+      <div class="card" style="margin-top:14px">
+        <h3>Registrar treino</h3>
+        <div class="grid2">
+          <div class="form-row"><label>Data</label><input type="date" id="fit-date"></div>
+          <div class="form-row"><label>Tipo</label>
+            <select id="fit-type">
+              <option>Musculação</option><option>Corrida</option><option>Ciclismo</option>
+              <option>Natação</option><option>HIIT</option><option>Yoga</option><option>Outro</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid2">
+          <div class="form-row"><label>Duração (min)</label><input type="number" id="fit-dur" placeholder="45"></div>
+          <div class="form-row"><label>Peso corporal (kg)</label><input type="number" id="fit-weight" placeholder="75"></div>
+        </div>
+        <div class="form-row"><label>Observações</label><input type="text" id="fit-notes" placeholder="Peito e tríceps..."></div>
+        <button class="btn" onclick="addWorkout()">Registrar</button>
       </div>
-      <div class="form-row"><label>Valor (R$)</label><input type="number" id="fin-val" placeholder="0,00"></div>
+      <h3 style="margin-top:4px">Histórico</h3>
+      <div id="fit-list"></div>
     </div>
-    <div class="grid2">
-      <div class="form-row"><label>Categoria</label>
-        <select id="fin-cat">
-          <option>Alimentação</option><option>Transporte</option><option>Moradia</option>
-          <option>Saúde</option><option>Lazer</option><option>Salário</option>
-          <option>Freelance</option><option>Outros</option>
-        </select>
+
+    <!-- FINANÇAS -->
+    <div class="page" id="page-finance">
+      <h2>💰 Finanças</h2>
+      <div class="grid3">
+        <div class="stat"><div class="stat-val" id="fin-bal" style="color:#86efac">R$0</div><div class="stat-lbl">Saldo</div></div>
+        <div class="stat"><div class="stat-val" id="fin-inc" style="color:#86efac">R$0</div><div class="stat-lbl">Receitas</div></div>
+        <div class="stat"><div class="stat-val" id="fin-exp" style="color:#fca5a5">R$0</div><div class="stat-lbl">Despesas</div></div>
       </div>
-      <div class="form-row"><label>Data</label><input type="date" id="fin-date"></div>
-    </div>
-    <div class="form-row"><label>Descrição</label><input type="text" id="fin-desc" placeholder="Mercado..."></div>
-    <button class="btn" onclick="addTransaction()">Adicionar</button>
-  </div>
-  <h3 style="margin-top:4px">Extrato</h3>
-  <div id="fin-list"></div>
-</div>
-
-<!-- TRABALHO -->
-<div class="page" id="page-work">
-  <h2>💼 Trabalho & Carreira</h2>
-  <div class="grid2">
-    <div class="stat"><div class="stat-val" id="work-open">0</div><div class="stat-lbl">Tarefas abertas</div></div>
-    <div class="stat"><div class="stat-val" id="work-done">0</div><div class="stat-lbl">Concluídas</div></div>
-  </div>
-  <div class="card" style="margin-top:14px">
-    <h3>Nova tarefa</h3>
-    <div class="form-row"><label>Tarefa</label><input type="text" id="work-task" placeholder="Reunião com cliente..."></div>
-    <div class="grid2">
-      <div class="form-row"><label>Projeto</label><input type="text" id="work-proj" placeholder="Projeto X"></div>
-      <div class="form-row"><label>Prazo</label><input type="date" id="work-due"></div>
-    </div>
-    <div class="form-row"><label>Prioridade</label>
-      <select id="work-pri"><option value="high">Alta</option><option value="mid" selected>Média</option><option value="low">Baixa</option></select>
-    </div>
-    <button class="btn" onclick="addTask()">Adicionar</button>
-  </div>
-  <div class="section-title">Em aberto</div>
-  <div id="work-list-open"></div>
-  <div class="section-title">Concluídas</div>
-  <div id="work-list-done"></div>
-</div>
-
-<!-- SAÚDE MENTAL -->
-<div class="page" id="page-mental">
-  <h2>🧘 Saúde Mental</h2>
-  <div class="card">
-    <h3>Como você está hoje?</h3>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="mood-btns">
-      <button class="mood-btn" onclick="selectMood(this,'😄 Ótimo')">😄</button>
-      <button class="mood-btn" onclick="selectMood(this,'🙂 Bem')">🙂</button>
-      <button class="mood-btn" onclick="selectMood(this,'😐 Neutro')">😐</button>
-      <button class="mood-btn" onclick="selectMood(this,'😔 Mal')">😔</button>
-      <button class="mood-btn" onclick="selectMood(this,'😢 Péssimo')">😢</button>
-      <button class="mood-btn" onclick="selectMood(this,'😤 Ansioso')">😤</button>
-      <button class="mood-btn" onclick="selectMood(this,'😴 Cansado')">😴</button>
-    </div>
-    <div class="form-row"><label>O que passou pela sua cabeça hoje?</label>
-      <textarea id="mental-entry" placeholder="Escreva livremente..."></textarea>
-    </div>
-    <div class="form-row"><label>3 coisas pelo que sou grato hoje</label>
-      <textarea id="mental-grat" placeholder="1. ..." style="min-height:60px"></textarea>
-    </div>
-    <button class="btn" onclick="saveMentalEntry()">Salvar registro</button>
-  </div>
-  <h3 style="margin-top:4px">Histórico emocional</h3>
-  <div id="mental-list"></div>
-</div>
-
-<!-- REDE SOCIAL -->
-<div class="page" id="page-social">
-  <h2>👥 Rede Social Real</h2>
-  <div class="card">
-    <h3>Adicionar contato</h3>
-    <div class="grid2">
-      <div class="form-row"><label>Nome</label><input type="text" id="soc-name" placeholder="João Silva"></div>
-      <div class="form-row"><label>Relação</label>
-        <select id="soc-rel"><option>Amigo</option><option>Familiar</option><option>Colega</option><option>Mentor</option><option>Outro</option></select>
+      <div class="card" style="margin-top:14px">
+        <h3>Nova transação</h3>
+        <div class="grid2">
+          <div class="form-row"><label>Tipo</label>
+            <select id="fin-type"><option value="income">Receita</option><option value="expense">Despesa</option></select>
+          </div>
+          <div class="form-row"><label>Valor (R$)</label><input type="number" id="fin-val" placeholder="0,00"></div>
+        </div>
+        <div class="grid2">
+          <div class="form-row"><label>Categoria</label>
+            <select id="fin-cat">
+              <option>Alimentação</option><option>Transporte</option><option>Moradia</option>
+              <option>Saúde</option><option>Lazer</option><option>Salário</option>
+              <option>Freelance</option><option>Outros</option>
+            </select>
+          </div>
+          <div class="form-row"><label>Data</label><input type="date" id="fin-date"></div>
+        </div>
+        <div class="form-row"><label>Descrição</label><input type="text" id="fin-desc" placeholder="Mercado..."></div>
+        <button class="btn" onclick="addTransaction()">Adicionar</button>
       </div>
+      <h3 style="margin-top:4px">Extrato</h3>
+      <div id="fin-list"></div>
     </div>
-    <div class="form-row"><label>Última conversa</label><input type="date" id="soc-last"></div>
-    <div class="form-row"><label>Notas</label><input type="text" id="soc-notes" placeholder="Gosta de futebol, mora em SP..."></div>
-    <button class="btn" onclick="addContact()">Adicionar</button>
-  </div>
-  <div class="section-title">Precisa entrar em contato</div>
-  <div id="soc-alert-list"></div>
-  <div class="section-title">Todos os contatos</div>
-  <div id="soc-list"></div>
-</div>
 
-<!-- AGENDA -->
-<div class="page" id="page-agenda">
-  <h2>📅 Agenda</h2>
-  <div class="card">
-    <h3>Novo compromisso</h3>
-    <div class="form-row"><label>Título</label><input type="text" id="ag-title" placeholder="Consulta médica..."></div>
-    <div class="grid2">
-      <div class="form-row"><label>Data</label><input type="date" id="ag-date"></div>
-      <div class="form-row"><label>Hora</label><input type="time" id="ag-time"></div>
-    </div>
-    <div class="grid2">
-      <div class="form-row"><label>Categoria</label>
-        <select id="ag-cat"><option>Pessoal</option><option>Saúde</option><option>Trabalho</option><option>Social</option><option>Outro</option></select>
+    <!-- TRABALHO -->
+    <div class="page" id="page-work">
+      <h2>💼 Trabalho & Carreira</h2>
+      <div class="grid2">
+        <div class="stat"><div class="stat-val" id="work-open">0</div><div class="stat-lbl">Tarefas abertas</div></div>
+        <div class="stat"><div class="stat-val" id="work-done">0</div><div class="stat-lbl">Concluídas</div></div>
       </div>
-      <div class="form-row"><label>Local</label><input type="text" id="ag-loc" placeholder="Consultório Dr. Ana..."></div>
+      <div class="card" style="margin-top:14px">
+        <h3>Nova tarefa</h3>
+        <div class="form-row"><label>Tarefa</label><input type="text" id="work-task" placeholder="Reunião com cliente..."></div>
+        <div class="grid2">
+          <div class="form-row"><label>Projeto</label><input type="text" id="work-proj" placeholder="Projeto X"></div>
+          <div class="form-row"><label>Prazo</label><input type="date" id="work-due"></div>
+        </div>
+        <div class="form-row"><label>Prioridade</label>
+          <select id="work-pri"><option value="high">Alta</option><option value="mid" selected>Média</option><option value="low">Baixa</option></select>
+        </div>
+        <button class="btn" onclick="addTask()">Adicionar</button>
+      </div>
+      <div class="section-title">Em aberto</div>
+      <div id="work-list-open"></div>
+      <div class="section-title">Concluídas</div>
+      <div id="work-list-done"></div>
     </div>
-    <button class="btn" onclick="addEvent()">Adicionar</button>
-  </div>
-  <div class="section-title">Próximos compromissos</div>
-  <div id="ag-upcoming"></div>
-  <div class="section-title">Passados</div>
-  <div id="ag-past"></div>
-</div>
 
-<!-- NOTAS -->
-<div class="page" id="page-notes">
-  <h2>📝 Notas</h2>
-  <div class="card">
-    <div class="form-row"><label>Título</label><input type="text" id="note-title" placeholder="Ideia de projeto..."></div>
-    <div class="form-row" style="margin-top:8px"><textarea id="note-body" placeholder="Escreva aqui..." style="min-height:100px"></textarea></div>
-    <div style="display:flex;gap:8px;margin-top:8px">
-      <select id="note-tag" style="flex:1">
-        <option>Ideia</option><option>Lembrança</option><option>Reflexão</option><option>Plano</option><option>Outro</option>
-      </select>
-      <button class="btn" onclick="addNote()">Salvar</button>
+    <!-- SAÚDE MENTAL -->
+    <div class="page" id="page-mental">
+      <h2>🧘 Saúde Mental</h2>
+      <div class="card">
+        <h3>Como você está hoje?</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px" id="mood-btns">
+          <button class="mood-btn" onclick="selectMood(this,'😄 Ótimo')">😄</button>
+          <button class="mood-btn" onclick="selectMood(this,'🙂 Bem')">🙂</button>
+          <button class="mood-btn" onclick="selectMood(this,'😐 Neutro')">😐</button>
+          <button class="mood-btn" onclick="selectMood(this,'😔 Mal')">😔</button>
+          <button class="mood-btn" onclick="selectMood(this,'😢 Péssimo')">😢</button>
+          <button class="mood-btn" onclick="selectMood(this,'😤 Ansioso')">😤</button>
+          <button class="mood-btn" onclick="selectMood(this,'😴 Cansado')">😴</button>
+        </div>
+        <div class="form-row"><label>O que passou pela sua cabeça hoje?</label>
+          <textarea id="mental-entry" placeholder="Escreva livremente..."></textarea>
+        </div>
+        <div class="form-row"><label>3 coisas pelo que sou grato hoje</label>
+          <textarea id="mental-grat" placeholder="1. ..." style="min-height:60px"></textarea>
+        </div>
+        <button class="btn" onclick="saveMentalEntry()">Salvar registro</button>
+      </div>
+      <h3 style="margin-top:4px">Histórico emocional</h3>
+      <div id="mental-list"></div>
     </div>
-  </div>
-  <div id="notes-list"></div>
-</div>
 
-</div>
+    <!-- REDE SOCIAL -->
+    <div class="page" id="page-social">
+      <h2>👥 Rede Social Real</h2>
+      <div class="card">
+        <h3>Adicionar contato</h3>
+        <div class="grid2">
+          <div class="form-row"><label>Nome</label><input type="text" id="soc-name" placeholder="João Silva"></div>
+          <div class="form-row"><label>Relação</label>
+            <select id="soc-rel"><option>Amigo</option><option>Familiar</option><option>Colega</option><option>Mentor</option><option>Outro</option></select>
+          </div>
+        </div>
+        <div class="form-row"><label>Última conversa</label><input type="date" id="soc-last"></div>
+        <div class="form-row"><label>Notas</label><input type="text" id="soc-notes" placeholder="Gosta de futebol, mora em SP..."></div>
+        <button class="btn" onclick="addContact()">Adicionar</button>
+      </div>
+      <div class="section-title">Precisa entrar em contato</div>
+      <div id="soc-alert-list"></div>
+      <div class="section-title">Todos os contatos</div>
+      <div id="soc-list"></div>
+    </div>
+
+    <!-- AGENDA -->
+    <div class="page" id="page-agenda">
+      <h2>📅 Agenda</h2>
+      <div class="card">
+        <h3>Novo compromisso</h3>
+        <div class="form-row"><label>Título</label><input type="text" id="ag-title" placeholder="Consulta médica..."></div>
+        <div class="grid2">
+          <div class="form-row"><label>Data</label><input type="date" id="ag-date"></div>
+          <div class="form-row"><label>Hora</label><input type="time" id="ag-time"></div>
+        </div>
+        <div class="grid2">
+          <div class="form-row"><label>Categoria</label>
+            <select id="ag-cat"><option>Pessoal</option><option>Saúde</option><option>Trabalho</option><option>Social</option><option>Outro</option></select>
+          </div>
+          <div class="form-row"><label>Local</label><input type="text" id="ag-loc" placeholder="Consultório Dr. Ana..."></div>
+        </div>
+        <button class="btn" onclick="addEvent()">Adicionar</button>
+      </div>
+      <div class="section-title">Próximos compromissos</div>
+      <div id="ag-upcoming"></div>
+      <div class="section-title">Passados</div>
+      <div id="ag-past"></div>
+    </div>
+
+    <!-- NOTAS -->
+    <div class="page" id="page-notes">
+      <h2>📝 Notas</h2>
+      <div class="card">
+        <div class="form-row"><label>Título</label><input type="text" id="note-title" placeholder="Ideia de projeto..."></div>
+        <div class="form-row" style="margin-top:8px"><textarea id="note-body" placeholder="Escreva aqui..." style="min-height:100px"></textarea></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <select id="note-tag" style="flex:1">
+            <option>Ideia</option><option>Lembrança</option><option>Reflexão</option><option>Plano</option><option>Outro</option>
+          </select>
+          <button class="btn" onclick="addNote()">Salvar</button>
+        </div>
+      </div>
+      <div id="notes-list"></div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
 
 <script>
 // ========== SUPABASE ==========
@@ -297,68 +377,41 @@ const sb = createClient(
   'sb_publishable_e6FHgaSx2tQyyYPqEH7jnw_AZN-NfuT'
 );
 
-// Cache local pra app funcionar rápido
 const cache = {
   workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[]
 };
 
 function setSyncStatus(status) {
   const el = document.getElementById('sync-status');
+  if(!el) return;
   if(status === 'ok') { el.textContent = '☁️ Salvo'; el.className = 'sync-ok'; }
   else if(status === 'err') { el.textContent = '❌ Erro'; el.className = 'sync-err'; }
   else { el.textContent = '⏳ Salvando...'; el.className = 'sync-loading'; }
 }
 
-// Carrega dados do Supabase
 async function loadFromDB(table) {
   try {
-    const { data: { user } } = await sb.auth.getUser()
-    if (!user) return []
-
-    const { data, error } = await sb
-      .from(table)
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false });
-
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return [];
+    const { data, error } = await sb.from(table).select('*').eq('user_id', user.id).order('created_at', { ascending: false });
     if(error) throw error;
-
-    cache[table] = data.map(row => ({
-      ...JSON.parse(row.data),
-      _dbid: row.id
-    }));
-
+    cache[table] = data.map(row => ({ ...JSON.parse(row.data), _dbid: row.id }));
     return cache[table];
-
   } catch(e) {
     console.error('Erro ao carregar ' + table, e);
     return cache[table];
   }
 }
 
-
-// Salva no Supabase
 async function saveToDB(table, item) {
   setSyncStatus('loading');
-
   try {
-    const { data: { user } } = await sb.auth.getUser()
-
-    if (!user) {
-      alert("Faça login primeiro")
-      return null
-    }
-
-    const { data, error } = await sb.from(table).insert([{
-      data: JSON.stringify(item),
-      user_id: user.id
-    }]).select();
-
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) { alert("Faça login primeiro"); return null; }
+    const { data, error } = await sb.from(table).insert([{ data: JSON.stringify(item), user_id: user.id }]).select();
     if(error) throw error;
-
     setSyncStatus('ok');
     return data[0].id;
-
   } catch(e) {
     console.error('Erro ao salvar', e);
     setSyncStatus('err');
@@ -366,8 +419,6 @@ async function saveToDB(table, item) {
   }
 }
 
-
-// Deleta do Supabase
 async function deleteFromDB(table, dbid) {
   setSyncStatus('loading');
   try {
@@ -380,19 +431,15 @@ async function deleteFromDB(table, dbid) {
   }
 }
 
-// Atualiza no Supabase
 async function updateInDB(table, dbid, item) {
   setSyncStatus('loading');
   try {
     const { error } = await sb.from(table).update({ data: JSON.stringify(item) }).eq('id', dbid);
     if(error) throw error;
     setSyncStatus('ok');
-  } catch(e) {
-    setSyncStatus('err');
-  }
+  } catch(e) { setSyncStatus('err'); }
 }
 
-// Carrega tudo ao iniciar
 async function loadAll() {
   setSyncStatus('loading');
   await Promise.all([
@@ -410,15 +457,19 @@ const fmtMoney = v => 'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigi
 const colors = ['#7c3aed','#0d9488','#d97706','#dc2626','#2563eb','#db2777'];
 const initials = n => n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
 
-function showPage(id){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+const PAGE_IDS = ['fitness','finance','work','mental','social','agenda','notes'];
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.tab')[['fitness','finance','work','mental','social','agenda','notes'].indexOf(id)].classList.add('active');
+  const idx = PAGE_IDS.indexOf(id);
+  document.querySelectorAll('.tab')[idx].classList.add('active');
   render();
 }
 
-document.querySelectorAll('input[type=date]').forEach(i=>i.value=today());
+// Set today's date on all date inputs
+document.querySelectorAll('input[type=date]').forEach(i => i.value = today());
 
 // ========== FITNESS ==========
 async function addWorkout(){
@@ -651,7 +702,7 @@ function renderAgenda(){
     </div>`;
   const upcoming=list.filter(e=>e.date>=now), past=list.filter(e=>e.date<now).reverse();
   document.getElementById('ag-upcoming').innerHTML=upcoming.length
-    ? upcoming.map((e,i)=>renderEv(e,list.indexOf(e))).join('')
+    ? upcoming.map((e)=>renderEv(e,list.indexOf(e))).join('')
     : '<div style="font-size:13px;color:#555;padding:8px 0">Sem compromissos futuros.</div>';
   document.getElementById('ag-past').innerHTML=past.slice(0,5).map((e)=>renderEv(e,list.indexOf(e))).join('');
 }
@@ -697,45 +748,38 @@ function render(){
   renderSocial(); renderAgenda(); renderNotes();
 }
 
-// ========== AUTH (LOGIN) ==========
-
-// Escuta mudanças de login/logout automaticamente
+// ========== AUTH ==========
 sb.auth.onAuthStateChange((event, session) => {
   const authEl = document.getElementById('auth');
   const appEl = document.getElementById('app-content');
-
   if (session) {
     authEl.style.display = 'none';
     appEl.style.display = 'flex';
     loadAll();
   } else {
-    authEl.style.display = 'block';
+    authEl.style.display = 'flex';
     appEl.style.display = 'none';
   }
 });
 
 async function signUp() {
-  const email = document.getElementById('auth-email').value
-  const password = document.getElementById('auth-pass').value
-
-  const { error } = await sb.auth.signUp({ email, password })
-
-  if (error) alert(error.message)
-  else alert("Conta criada! Agora faça login.")
+  const email = document.getElementById('auth-email').value;
+  const password = document.getElementById('auth-pass').value;
+  const { error } = await sb.auth.signUp({ email, password });
+  if (error) alert(error.message);
+  else alert("Conta criada! Agora faça login.");
 }
 
 async function signIn() {
-  const email = document.getElementById('auth-email').value
-  const password = document.getElementById('auth-pass').value
-
-  const { error } = await sb.auth.signInWithPassword({ email, password })
-
-  if (error) alert(error.message)
-  else alert("Logado!")
+  const email = document.getElementById('auth-email').value;
+  const password = document.getElementById('auth-pass').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) alert(error.message);
 }
 
 async function logout() {
   await sb.auth.signOut();
 }
-
 </script>
+</body>
+</html>

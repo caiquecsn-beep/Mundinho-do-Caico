@@ -162,6 +162,8 @@ select option{background:#1a1a22}
 
     <div class="tab active" onclick="showPage('home')">
       <span class="icon">🏠</span><span>home</span>
+    </div>
+    
     <div class="tab active" onclick="showPage('fitness')">
       <span class="icon">💪</span><span>Fitness</span>
     </div>
@@ -195,9 +197,15 @@ select option{background:#1a1a22}
 
   <!-- CONTEÚDO -->
   <div class="main-content">
+    
+<!-- HOME -->
+  <div class="page active" id="page-home">
+    <h2>🏠 Início</h2>
+    <div class="grid3" id="home-menu"></div>
+  </div>
 
     <!-- FITNESS -->
-    <div class="page active" id="page-fitness">
+    <div class="page" id="page-fitness">
       <h2>💪 Fitness & Saúde</h2>
       <div class="grid3" id="fit-stats">
         <div class="stat"><div class="stat-val" id="fit-total">0</div><div class="stat-lbl">Treinos total</div></div>

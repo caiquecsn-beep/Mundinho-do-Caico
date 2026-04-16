@@ -789,6 +789,24 @@ async function toggleHabit(dbid, i){
   renderHabits();
 }
 
+async function toggleHabitDate(dbid, i){
+  const input = document.getElementById(`habit-date-${i}`);
+  const selectedDate = input.value;
+  if(!selectedDate) return;
+
+  const habit = cache.habits[i];
+
+  if(habit.dates.includes(selectedDate)){
+    habit.dates = habit.dates.filter(d => d !== selectedDate);
+  } else {
+    habit.dates.push(selectedDate);
+  }
+
+  await updateInDB('habits', dbid, habit);
+  renderHabits();
+}
+
+// 🔥 streak (dias seguidos)
 function calcStreak(dates){
   const sorted = [...dates].sort().reverse();
   let streak = 0;
@@ -810,10 +828,13 @@ function calcStreak(dates){
   return streak;
 }
 
+// 📅 mini calendário (últimos 7 dias)
 function renderWeek(dates){
   const days = [];
+
   for(let i = 6; i >= 0; i--){
     const d = new Date(Date.now() - i * 864e5).toISOString().split('T')[0];
+
     days.push(`
       <div style="
         width:22px;height:22px;border-radius:6px;
@@ -826,9 +847,11 @@ function renderWeek(dates){
       </div>
     `);
   }
+
   return `<div style="display:flex;gap:4px">${days.join('')}</div>`;
 }
 
+// 🎯 render principal
 function renderHabits(){
   const list = cache.habits;
 
@@ -836,65 +859,64 @@ function renderHabits(){
 
     const total = h.dates.length;
 
-const firstDate = h.dates.length 
-  ? [...h.dates].sort()[0] 
-  : null;
+    const firstDate = h.dates.length ? [...h.dates].sort()[0] : null;
 
-const daysSinceStart = firstDate 
-  ? Math.floor((new Date() - new Date(firstDate)) / 864e5) + 1 
-  : 0;
+    const daysSinceStart = firstDate 
+      ? Math.floor((new Date() - new Date(firstDate)) / 864e5) + 1 
+      : 0;
 
-const streak = calcStreak(h.dates);
-
-const consistency = daysSinceStart 
-  ? Math.round((total / daysSinceStart) * 100) 
-  : 0;
-
-const didToday = h.dates.includes(today());
+    const consistency = daysSinceStart
+      ? Math.round((total / daysSinceStart) * 100)
+      : 0;
 
     return `
-<div class="card">
+      <div class="card">
+        
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-weight:600">${h.name}</div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <div>
-      <div style="font-weight:600;font-size:15px">${h.name}</div>
+            <div class="days-ago">
+              🔥 ${calcStreak(h.dates)} dias seguidos
+            </div>
 
-      <div style="font-size:13px;color:#a78bfa;margin-top:2px">
-        🔥 ${streak} dias seguidos
+            <div class="days-ago">
+              📊 ${consistency}% de consistência
+            </div>
+
+            <div class="days-ago">
+              📆 ${total} dias praticados
+            </div>
+          </div>
+
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
+              ${h.dates.includes(today()) ? '✔️' : 'Marcar'}
+            </button>
+
+            <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
+          </div>
+        </div>
+
+        <!-- 📅 marcar data antiga -->
+        <div style="display:flex;gap:6px;align-items:center;margin-top:10px">
+          <input type="date" id="habit-date-${i}" 
+            value="${today()}"
+            style="width:130px;font-size:11px;padding:4px">
+
+          <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">
+            Marcar data
+          </button>
+        </div>
+
+        <!-- 📊 semana -->
+        <div style="margin-top:10px">
+          ${renderWeek(h.dates)}
+        </div>
+
       </div>
+    `;
 
-      <div style="font-size:11px;color:#666;margin-top:4px">
-        📆 Começou há ${daysSinceStart} dias
-      </div>
-    </div>
-
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
-      
-      <span class="badge ${didToday ? 'badge-green' : 'badge-yellow'}">
-        ${didToday ? '✔️ Hoje feito' : '⏳ Pendente'}
-      </span>
-
-      <span class="badge badge-purple">
-        ${consistency}% consistência
-      </span>
-
-    </div>
-  </div>
-
-  <div style="display:flex;gap:6px;margin-top:10px">
-    <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
-      ${didToday ? 'Desmarcar' : 'Marcar hoje'}
-    </button>
-
-    <button class="delete-btn" onclick="delItem('habits','${h._dbid}',${i})">✕</button>
-  </div>
-
-  <div style="margin-top:10px">
-    ${renderWeek(h.dates)}
-  </div>
-
-</div>
-`;
   }).join('');
 }
 // ========== DELETE ==========

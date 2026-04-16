@@ -181,6 +181,9 @@ select option{background:#1a1a22}
     <div class="tab" onclick="showPage('notes')">
       <span class="icon">📝</span><span>Notas</span>
     </div>
+    <div class="tab" onclick="showPage('habits')">
+  <span class="icon">📊</span><span>Hábitos</span>
+</div>
 
     <div class="sidebar-bottom">
       <span id="sync-status" class="sync-ok">☁️ Salvo</span>
@@ -365,6 +368,21 @@ select option{background:#1a1a22}
       </div>
       <div id="notes-list"></div>
     </div>
+    
+    <!-- HÁBITOS -->
+<div class="page" id="page-habits">
+  <h2>📊 Habit Tracker</h2>
+
+  <div class="card">
+    <h3>Novo hábito</h3>
+    <div class="form-row">
+      <input type="text" id="hab-name" placeholder="Ex: Ler 10 páginas">
+    </div>
+    <button class="btn" onclick="addHabit()">Adicionar</button>
+  </div>
+
+  <div id="habits-list"></div>
+</div>
 
   </div><!-- /main-content -->
 </div><!-- /app -->
@@ -378,7 +396,7 @@ const sb = createClient(
 );
 
 const cache = {
-  workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[]
+  workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[], habits:[]
 };
 
 function setSyncStatus(status) {

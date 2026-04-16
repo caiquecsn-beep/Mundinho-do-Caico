@@ -72,19 +72,41 @@ select option{background:#1a1a22}
 </div>
 <div id="app-content" class="app" style="display:none">
 
-<nav id="nav">
-  <div class="tab active" onclick="showPage('fitness')"><span class="icon">💪</span>Fitness</div>
-  <div class="tab" onclick="showPage('finance')"><span class="icon">💰</span>Finanças</div>
-  <div class="tab" onclick="showPage('work')"><span class="icon">💼</span>Trabalho</div>
-  <div class="tab" onclick="showPage('mental')"><span class="icon">🧘</span>Mental</div>
-  <div class="tab" onclick="showPage('social')"><span class="icon">👥</span>Rede Social</div>
-  <div class="tab" onclick="showPage('agenda')"><span class="icon">📅</span>Agenda</div>
-  <div class="tab" onclick="showPage('notes')"><span class="icon">📝</span>Notas</div>
-  <span id="sync-status" class="sync-loading">⏳ Carregando...</span>
-  <button class="btn btn-danger btn-sm" onclick="logout()" style="margin-left:auto">
-    Sair
-  </button>
-</nav>
+<div id="sidebar" class="sidebar">
+  <div class="sidebar-header">
+    <button onclick="toggleSidebar()">☰</button>
+  </div>
+
+  <div class="tab active" onclick="showPage('fitness')">
+    <span class="icon">💪</span><span class="label">Fitness</span>
+  </div>
+
+  <div class="tab" onclick="showPage('finance')">
+    <span class="icon">💰</span><span class="label">Finanças</span>
+  </div>
+
+  <div class="tab" onclick="showPage('work')">
+    <span class="icon">💼</span><span class="label">Trabalho</span>
+  </div>
+
+  <div class="tab" onclick="showPage('mental')">
+    <span class="icon">🧘</span><span class="label">Mental</span>
+  </div>
+
+  <div class="tab" onclick="showPage('social')">
+    <span class="icon">👥</span><span class="label">Social</span>
+  </div>
+
+  <div class="tab" onclick="showPage('agenda')">
+    <span class="icon">📅</span><span class="label">Agenda</span>
+  </div>
+
+  <div class="tab" onclick="showPage('notes')">
+    <span class="icon">📝</span><span class="label">Notas</span>
+  </div>
+
+  <button class="btn btn-ghost btn-sm" onclick="logout()">🚪 Sair</button>
+</div>
 
 <!-- FITNESS -->
 <div class="page active" id="page-fitness">

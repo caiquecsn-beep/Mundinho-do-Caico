@@ -63,6 +63,15 @@ select option{background:#1a1a22}
 </head>
 <body>
 <div class="app">
+<div id="auth" style="padding:12px;background:#18181f;border-bottom:1px solid #2a2a35">
+  <input type="email" id="auth-email" placeholder="Email" style="margin-bottom:6px">
+  <input type="password" id="auth-pass" placeholder="Senha" style="margin-bottom:6px">
+  <div style="display:flex;gap:6px">
+    <button class="btn" onclick="signIn()">Entrar</button>
+    <button class="btn btn-ghost" onclick="signUp()">Criar conta</button>
+    <button class="btn btn-danger" onclick="logout()">Sair</button>
+  </div>
+</div>
 
 <nav id="nav">
   <div class="tab active" onclick="showPage('fitness')"><span class="icon">💪</span>Fitness</div>
@@ -275,30 +284,60 @@ function setSyncStatus(status) {
 // Carrega dados do Supabase
 async function loadFromDB(table) {
   try {
-    const { data, error } = await sb.from(table).select('*').order('created_at', { ascending: false });
+    const { data: { user } } = await sb.auth.getUser()
+    if (!user) return []
+
+    const { data, error } = await sb
+      .from(table)
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
     if(error) throw error;
-    cache[table] = data.map(row => ({ ...JSON.parse(row.data), _dbid: row.id }));
+
+    cache[table] = data.map(row => ({
+      ...JSON.parse(row.data),
+      _dbid: row.id
+    }));
+
     return cache[table];
+
   } catch(e) {
     console.error('Erro ao carregar ' + table, e);
     return cache[table];
   }
 }
 
+
 // Salva no Supabase
 async function saveToDB(table, item) {
   setSyncStatus('loading');
+
   try {
-    const { data, error } = await sb.from(table).insert([{ data: JSON.stringify(item) }]).select();
+    const { data: { user } } = await sb.auth.getUser()
+
+    if (!user) {
+      alert("Faça login primeiro")
+      return null
+    }
+
+    const { data, error } = await sb.from(table).insert([{
+      data: JSON.stringify(item),
+      user_id: user.id
+    }]).select();
+
     if(error) throw error;
+
     setSyncStatus('ok');
     return data[0].id;
+
   } catch(e) {
     console.error('Erro ao salvar', e);
     setSyncStatus('err');
     return null;
   }
 }
+
 
 // Deleta do Supabase
 async function deleteFromDB(table, dbid) {
@@ -632,6 +671,34 @@ function render(){
 
 // Inicia carregando tudo do banco
 loadAll();
+  async function signUp() {
+  const email = document.getElementById('auth-email').value
+  const password = document.getElementById('auth-pass').value
+
+  const { error } = await sb.auth.signUp({ email, password })
+
+  if (error) alert(error.message)
+  else alert("Conta criada! Agora faça login.")
+}
+
+async function signIn() {
+  const email = document.getElementById('auth-email').value
+  const password = document.getElementById('auth-pass').value
+
+  const { error } = await sb.auth.signInWithPassword({ email, password })
+
+  if (error) alert(error.message)
+  else {
+    alert("Logado!")
+    loadAll()
+  }
+}
+
+async function logout() {
+  await sb.auth.signOut()
+  alert("Saiu!")
+}
+
 </script>
 </body>
 </html>

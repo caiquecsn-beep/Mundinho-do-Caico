@@ -160,6 +160,8 @@ select option{background:#1a1a22}
   <nav class="sidebar">
     <div class="sidebar-logo">🌍 Mundinho do Caico</div>
 
+    <div class="tab active" onclick="showPage('home')">
+      <span class="icon">🏠</span><span>home</span>
     <div class="tab active" onclick="showPage('fitness')">
       <span class="icon">💪</span><span>Fitness</span>
     </div>
@@ -476,7 +478,7 @@ const fmtMoney = v => 'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigi
 const colors = ['#7c3aed','#0d9488','#d97706','#dc2626','#2563eb','#db2777'];
 const initials = n => n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
 
-const PAGE_IDS = ['fitness','finance','work','mental','social','agenda','notes','habits'];
+const PAGE_IDS = ['home','fitness','finance','work','mental','social','agenda','notes','habits'];
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));

@@ -63,8 +63,9 @@ body{font-family:system-ui,sans-serif;background:#0f0f13;color:#e8e8f0;min-heigh
 h2{font-size:17px;font-weight:600;margin-bottom:14px;color:#e8e8f0}
 h3{font-size:14px;font-weight:600;margin-bottom:8px;color:#c4b5fd}
 .card{background:#18181f;border:1px solid #2a2a35;border-radius:12px;padding:14px;margin-bottom:12px}
-.btn{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500}
+.btn{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500;transition:background .15s}
 .btn:hover{background:#6d28d9}
+.btn:disabled{background:#3a2a5e;color:#666;cursor:not-allowed}
 .btn-sm{padding:5px 10px;font-size:12px}
 .btn-ghost{background:transparent;border:1px solid #3a3a4a;color:#aaa}
 .btn-ghost:hover{background:#2a2a35;color:#e8e8f0}
@@ -96,6 +97,33 @@ label{font-size:12px;color:#888;display:block;margin-bottom:4px}
 .delete-btn:hover{color:#f87171;background:#1e1e28}
 select option{background:#1a1a22}
 
+/* TOAST */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:#1e1e28;border:1px solid #2a2a35;border-radius:12px;
+  padding:12px 16px;font-size:13px;max-width:320px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);
+  transform:translateY(100px);opacity:0;
+  transition:all .3s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;
+}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.toast-ok{border-color:#14532d;color:#86efac}
+#toast.toast-err{border-color:#7f1d1d;color:#fca5a5}
+#toast.toast-warn{border-color:#713f12;color:#fde68a}
+
+/* ERRO DE CONFIG */
+.config-warning{
+  background:#1a1208;border:1px solid #713f12;border-radius:10px;
+  padding:12px 14px;font-size:12px;color:#fde68a;margin-bottom:14px;
+  line-height:1.6;
+}
+.config-warning strong{display:block;margin-bottom:4px;font-size:13px}
+.config-warning code{
+  background:#0f0f13;padding:2px 6px;border-radius:4px;
+  font-family:monospace;font-size:11px;word-break:break-all;
+}
+
 /* FACULDADE */
 .disciplina-card{
   background:#18181f;border:1px solid #2a2a35;border-radius:12px;
@@ -121,21 +149,31 @@ select option{background:#1a1a22}
 }
 .estudei-label{font-size:13px;color:#aaa;transition:color .2s}
 .estudei-toggle.done .estudei-label{color:#86efac;font-weight:500}
-.disciplina-obs{
-  margin-top:10px;font-size:12px;color:#888;
-  background:#0f0f13;border-radius:8px;padding:8px 10px;
-  border:1px solid #2a2a35;white-space:pre-wrap;line-height:1.5
-}
 .disciplina-actions{display:flex;gap:6px;margin-top:10px;align-items:center}
 .fac-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
 
+/* SPINNER inline */
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #ffffff44;border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
 /* AUTH */
 #auth{position:fixed;inset:0;z-index:100;background:#0f0f13;display:flex;align-items:center;justify-content:center}
-.auth-box{background:#18181f;border:1px solid #2a2a35;border-radius:16px;padding:28px 24px;width:100%;max-width:340px}
+.auth-box{background:#18181f;border:1px solid #2a2a35;border-radius:16px;padding:28px 24px;width:100%;max-width:360px}
 .auth-box h2{text-align:center;margin-bottom:20px;color:#a78bfa}
 .auth-box .form-row{margin-bottom:12px}
 .auth-actions{display:flex;gap:8px;margin-top:4px}
 .auth-actions .btn{flex:1}
+
+/* SUPABASE CONFIG no auth */
+.auth-config{
+  margin-top:16px;padding-top:14px;border-top:1px solid #2a2a35;
+}
+.auth-config summary{
+  font-size:11px;color:#666;cursor:pointer;
+  list-style:none;display:flex;align-items:center;gap:6px;
+}
+.auth-config summary::before{content:'⚙️'}
+.auth-config .form-row{margin-top:10px;margin-bottom:8px}
 
 /* MOBILE */
 @media(max-width:600px){
@@ -147,10 +185,14 @@ select option{background:#1a1a22}
   .page{padding:14px}
   .home-grid{grid-template-columns:repeat(2,1fr)}
   .fac-stats{grid-template-columns:1fr 1fr}
+  #toast{bottom:80px;right:12px;left:12px;max-width:none}
 }
 </style>
 </head>
 <body>
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <!-- AUTH -->
 <div id="auth">
@@ -162,13 +204,23 @@ select option{background:#1a1a22}
       <button class="btn" onclick="signIn()">Entrar</button>
       <button class="btn btn-ghost" onclick="signUp()">Criar conta</button>
     </div>
+
+    <!-- Config avançada: trocar chave Supabase -->
+    <details class="auth-config">
+      <summary>Configurar chave do Supabase</summary>
+      <div class="form-row" style="margin-top:10px">
+        <label>Anon Key (começa com eyJ...)</label>
+        <input type="text" id="sb-key-input" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...">
+      </div>
+      <button class="btn btn-sm btn-ghost" onclick="saveCustomKey()">Salvar chave</button>
+      <div id="key-status" style="font-size:11px;color:#666;margin-top:6px"></div>
+    </details>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app-content" class="app" style="display:none">
 
-  <!-- SIDEBAR — ordem alfabética: Agenda, Faculdade, Finanças, Fitness, Hábitos, Home, Mental, Notas, Trabalho -->
   <nav class="sidebar">
     <div class="sidebar-logo">🌍 Mundinho do Caico</div>
 
@@ -188,7 +240,6 @@ select option{background:#1a1a22}
     </div>
   </nav>
 
-  <!-- CONTEÚDO -->
   <div class="main-content">
 
     <!-- HOME -->
@@ -196,46 +247,14 @@ select option{background:#1a1a22}
       <h2>🏠 Home</h2>
       <p style="font-size:13px;color:#666;margin-bottom:18px">Selecione uma área para começar:</p>
       <div class="home-grid">
-        <div class="home-card" onclick="showPage('agenda')">
-          <span class="hc-icon">📅</span>
-          <span class="hc-name">Agenda</span>
-          <span class="hc-desc">Compromissos e eventos futuros</span>
-        </div>
-        <div class="home-card" onclick="showPage('faculdade')">
-          <span class="hc-icon">🎓</span>
-          <span class="hc-name">Faculdade</span>
-          <span class="hc-desc">Disciplinas, estudos e progresso semanal</span>
-        </div>
-        <div class="home-card" onclick="showPage('finance')">
-          <span class="hc-icon">💰</span>
-          <span class="hc-name">Finanças</span>
-          <span class="hc-desc">Receitas, despesas e saldo atual</span>
-        </div>
-        <div class="home-card" onclick="showPage('fitness')">
-          <span class="hc-icon">💪</span>
-          <span class="hc-name">Fitness</span>
-          <span class="hc-desc">Treinos, peso corporal e sequência de dias</span>
-        </div>
-        <div class="home-card" onclick="showPage('habits')">
-          <span class="hc-icon">📊</span>
-          <span class="hc-name">Hábitos</span>
-          <span class="hc-desc">Rastreador de hábitos e consistência</span>
-        </div>
-        <div class="home-card" onclick="showPage('mental')">
-          <span class="hc-icon">🧘</span>
-          <span class="hc-name">Mental</span>
-          <span class="hc-desc">Humor diário, reflexões e gratidão</span>
-        </div>
-        <div class="home-card" onclick="showPage('notes')">
-          <span class="hc-icon">📝</span>
-          <span class="hc-name">Notas</span>
-          <span class="hc-desc">Ideias, planos e reflexões escritas</span>
-        </div>
-        <div class="home-card" onclick="showPage('work')">
-          <span class="hc-icon">💼</span>
-          <span class="hc-name">Trabalho</span>
-          <span class="hc-desc">Tarefas, projetos e prazos</span>
-        </div>
+        <div class="home-card" onclick="showPage('agenda')"><span class="hc-icon">📅</span><span class="hc-name">Agenda</span><span class="hc-desc">Compromissos e eventos futuros</span></div>
+        <div class="home-card" onclick="showPage('faculdade')"><span class="hc-icon">🎓</span><span class="hc-name">Faculdade</span><span class="hc-desc">Disciplinas, estudos e progresso semanal</span></div>
+        <div class="home-card" onclick="showPage('finance')"><span class="hc-icon">💰</span><span class="hc-name">Finanças</span><span class="hc-desc">Receitas, despesas e saldo atual</span></div>
+        <div class="home-card" onclick="showPage('fitness')"><span class="hc-icon">💪</span><span class="hc-name">Fitness</span><span class="hc-desc">Treinos, peso corporal e sequência de dias</span></div>
+        <div class="home-card" onclick="showPage('habits')"><span class="hc-icon">📊</span><span class="hc-name">Hábitos</span><span class="hc-desc">Rastreador de hábitos e consistência</span></div>
+        <div class="home-card" onclick="showPage('mental')"><span class="hc-icon">🧘</span><span class="hc-name">Mental</span><span class="hc-desc">Humor diário, reflexões e gratidão</span></div>
+        <div class="home-card" onclick="showPage('notes')"><span class="hc-icon">📝</span><span class="hc-name">Notas</span><span class="hc-desc">Ideias, planos e reflexões escritas</span></div>
+        <div class="home-card" onclick="showPage('work')"><span class="hc-icon">💼</span><span class="hc-name">Trabalho</span><span class="hc-desc">Tarefas, projetos e prazos</span></div>
       </div>
     </div>
 
@@ -263,7 +282,7 @@ select option{background:#1a1a22}
           <div class="form-row"><label>Peso corporal (kg)</label><input type="number" id="fit-weight" placeholder="75"></div>
         </div>
         <div class="form-row"><label>Observações</label><input type="text" id="fit-notes" placeholder="Peito e tríceps..."></div>
-        <button class="btn" onclick="addWorkout()">Registrar</button>
+        <button class="btn" id="btn-fit" onclick="addWorkout()">Registrar</button>
       </div>
       <h3 style="margin-top:4px">Histórico</h3>
       <div id="fit-list"></div>
@@ -296,7 +315,7 @@ select option{background:#1a1a22}
           <div class="form-row"><label>Data</label><input type="date" id="fin-date"></div>
         </div>
         <div class="form-row"><label>Descrição</label><input type="text" id="fin-desc" placeholder="Mercado..."></div>
-        <button class="btn" onclick="addTransaction()">Adicionar</button>
+        <button class="btn" id="btn-fin" onclick="addTransaction()">Adicionar</button>
       </div>
       <h3 style="margin-top:4px">Extrato</h3>
       <div id="fin-list"></div>
@@ -319,7 +338,7 @@ select option{background:#1a1a22}
         <div class="form-row"><label>Prioridade</label>
           <select id="work-pri"><option value="high">Alta</option><option value="mid" selected>Média</option><option value="low">Baixa</option></select>
         </div>
-        <button class="btn" onclick="addTask()">Adicionar</button>
+        <button class="btn" id="btn-work" onclick="addTask()">Adicionar</button>
       </div>
       <div class="section-title">Em aberto</div>
       <div id="work-list-open"></div>
@@ -347,7 +366,7 @@ select option{background:#1a1a22}
         <div class="form-row"><label>3 coisas pelo que sou grato hoje</label>
           <textarea id="mental-grat" placeholder="1. ..." style="min-height:60px"></textarea>
         </div>
-        <button class="btn" onclick="saveMentalEntry()">Salvar registro</button>
+        <button class="btn" id="btn-mental" onclick="saveMentalEntry()">Salvar registro</button>
       </div>
       <h3 style="margin-top:4px">Histórico emocional</h3>
       <div id="mental-list"></div>
@@ -356,6 +375,18 @@ select option{background:#1a1a22}
     <!-- FACULDADE -->
     <div class="page" id="page-faculdade">
       <h2>🎓 Faculdade</h2>
+
+      <!-- Aviso de configuração (aparece só se chave inválida) -->
+      <div id="fac-config-warn" class="config-warning" style="display:none">
+        <strong>⚠️ Chave do Supabase inválida</strong>
+        A chave atual não é uma JWT anon key válida. Por isso os dados não estão sendo salvos.<br><br>
+        <strong>Como corrigir:</strong><br>
+        1. Acesse seu projeto em <code>supabase.com/dashboard</code><br>
+        2. Vá em <strong>Project Settings → API</strong><br>
+        3. Copie a <strong>anon public key</strong> (começa com <code>eyJ...</code>)<br>
+        4. Clique em "Sair", expanda <strong>⚙️ Configurar chave</strong> e cole a chave
+      </div>
+
       <div class="fac-stats">
         <div class="stat"><div class="stat-val" id="fac-total">0</div><div class="stat-lbl">Disciplinas</div></div>
         <div class="stat"><div class="stat-val" id="fac-estudadas" style="color:#86efac">0</div><div class="stat-lbl">Estudadas essa semana</div></div>
@@ -365,12 +396,16 @@ select option{background:#1a1a22}
       <div class="card">
         <h3>Adicionar disciplina</h3>
         <div class="grid2">
-          <div class="form-row"><label>Nome da disciplina</label><input type="text" id="fac-nome" placeholder="Cálculo II..."></div>
+          <div class="form-row"><label>Nome da disciplina *</label><input type="text" id="fac-nome" placeholder="Cálculo II..."></div>
           <div class="form-row"><label>Período / Semestre</label><input type="text" id="fac-periodo" placeholder="3º semestre"></div>
         </div>
         <div class="form-row"><label>Professor(a)</label><input type="text" id="fac-prof" placeholder="Prof. Dr. João..."></div>
-        <div class="form-row"><label>Observações iniciais</label><textarea id="fac-obs" placeholder="Próxima prova, tópicos importantes, dificuldades..." style="min-height:60px"></textarea></div>
-        <button class="btn" onclick="addDisciplina()">Adicionar disciplina</button>
+        <div class="form-row"><label>Observações iniciais</label>
+          <textarea id="fac-obs" placeholder="Próxima prova, tópicos importantes, dificuldades..." style="min-height:60px"></textarea>
+        </div>
+        <!-- Feedback inline do formulário -->
+        <div id="fac-form-msg" style="font-size:12px;margin-bottom:8px;min-height:16px"></div>
+        <button class="btn" id="btn-fac" onclick="addDisciplina()">Adicionar disciplina</button>
       </div>
 
       <div class="section-title">Minhas disciplinas</div>
@@ -393,7 +428,7 @@ select option{background:#1a1a22}
           </div>
           <div class="form-row"><label>Local</label><input type="text" id="ag-loc" placeholder="Consultório Dr. Ana..."></div>
         </div>
-        <button class="btn" onclick="addEvent()">Adicionar</button>
+        <button class="btn" id="btn-ag" onclick="addEvent()">Adicionar</button>
       </div>
       <div class="section-title">Próximos compromissos</div>
       <div id="ag-upcoming"></div>
@@ -411,7 +446,7 @@ select option{background:#1a1a22}
           <select id="note-tag" style="flex:1">
             <option>Ideia</option><option>Lembrança</option><option>Reflexão</option><option>Plano</option><option>Outro</option>
           </select>
-          <button class="btn" onclick="addNote()">Salvar</button>
+          <button class="btn" id="btn-note" onclick="addNote()">Salvar</button>
         </div>
       </div>
       <div id="notes-list"></div>
@@ -423,60 +458,129 @@ select option{background:#1a1a22}
       <div class="card">
         <h3>Novo hábito</h3>
         <div class="form-row"><input type="text" id="hab-name" placeholder="Ex: Ler 10 páginas"></div>
-        <button class="btn" onclick="addHabit()">Adicionar</button>
+        <button class="btn" id="btn-hab" onclick="addHabit()">Adicionar</button>
       </div>
       <div id="habits-list"></div>
     </div>
 
-  </div><!-- /main-content -->
-</div><!-- /app -->
+  </div>
+</div>
 
 <script>
-// ========== SUPABASE ==========
-const { createClient } = supabase;
-const sb = createClient(
-  'https://tflhckvukijjpimiwmla.supabase.co',
-  'sb_publishable_e6FHgaSx2tQyyYPqEH7jnw_AZN-NfuT'
-);
+// ========== SUPABASE CONFIG ==========
+const SUPABASE_URL = 'https://tflhckvukijjpimiwmla.supabase.co';
+const DEFAULT_KEY  = 'sb_publishable_e6FHgaSx2tQyyYPqEH7jnw_AZN-NfuT';
 
+function getKey() {
+  return localStorage.getItem('sb_custom_key') || DEFAULT_KEY;
+}
+
+function isValidJWT(key) {
+  // anon key é um JWT: 3 partes separadas por '.'
+  return typeof key === 'string' && key.startsWith('eyJ') && key.split('.').length === 3;
+}
+
+function saveCustomKey() {
+  const val = document.getElementById('sb-key-input').value.trim();
+  if (!isValidJWT(val)) {
+    document.getElementById('key-status').textContent = '❌ Chave inválida. Deve começar com eyJ...';
+    document.getElementById('key-status').style.color = '#fca5a5';
+    return;
+  }
+  localStorage.setItem('sb_custom_key', val);
+  document.getElementById('key-status').textContent = '✅ Chave salva! Faça login agora.';
+  document.getElementById('key-status').style.color = '#86efac';
+  // Reinicia o cliente com a nova chave
+  initSupabase();
+}
+
+let sb;
+function initSupabase() {
+  const { createClient } = supabase;
+  sb = createClient(SUPABASE_URL, getKey());
+}
+initSupabase();
+
+// ========== TOAST ==========
+let toastTimer;
+function showToast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show toast-${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = ''; }, 3500);
+}
+
+// ========== CACHE ==========
 const cache = {
-  workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[], habits:[], disciplinas:[]
+  workouts:[], transactions:[], tasks:[], mental:[],
+  contacts:[], events:[], notes:[], habits:[], disciplinas:[]
 };
 
 function setSyncStatus(status) {
   const el = document.getElementById('sync-status');
   if(!el) return;
-  if(status === 'ok') { el.textContent = '☁️ Salvo'; el.className = 'sync-ok'; }
-  else if(status === 'err') { el.textContent = '❌ Erro'; el.className = 'sync-err'; }
-  else { el.textContent = '⏳ Salvando...'; el.className = 'sync-loading'; }
+  if(status === 'ok')       { el.textContent = '☁️ Salvo';    el.className = 'sync-ok'; }
+  else if(status === 'err') { el.textContent = '❌ Erro';     el.className = 'sync-err'; }
+  else                      { el.textContent = '⏳ Salvando…'; el.className = 'sync-loading'; }
 }
 
+function setBtnLoading(id, loading) {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  if (loading) {
+    btn._orig = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span>Salvando…';
+    btn.disabled = true;
+  } else {
+    btn.innerHTML = btn._orig || btn.innerHTML;
+    btn.disabled = false;
+  }
+}
+
+// ========== DB ==========
 async function loadFromDB(table) {
   try {
     const { data: { user } } = await sb.auth.getUser();
     if (!user) return [];
     const { data, error } = await sb.from(table).select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-    if(error) throw error;
-    cache[table] = data.map(row => ({ ...JSON.parse(row.data), _dbid: row.id }));
+    if (error) throw error;
+    cache[table] = data.map(row => {
+      try { return { ...JSON.parse(row.data), _dbid: row.id }; }
+      catch { return { _dbid: row.id }; }
+    });
     return cache[table];
   } catch(e) {
-    console.error('Erro ao carregar ' + table, e);
+    console.error('loadFromDB [' + table + ']:', e);
     return cache[table];
   }
 }
 
-async function saveToDB(table, item) {
+async function saveToDB(table, item, btnId) {
   setSyncStatus('loading');
+  if (btnId) setBtnLoading(btnId, true);
   try {
     const { data: { user } } = await sb.auth.getUser();
-    if (!user) { alert("Faça login primeiro"); return null; }
-    const { data, error } = await sb.from(table).insert([{ data: JSON.stringify(item), user_id: user.id }]).select();
-    if(error) throw error;
+    if (!user) throw new Error('Usuário não autenticado');
+
+    // Serializa e valida antes de enviar
+    const payload = JSON.stringify(item);
+    if (!payload) throw new Error('Dados inválidos para serialização');
+
+    const { data, error } = await sb
+      .from(table)
+      .insert([{ data: payload, user_id: user.id }])
+      .select();
+
+    if (error) throw error;
     setSyncStatus('ok');
+    if (btnId) setBtnLoading(btnId, false);
     return data[0].id;
   } catch(e) {
-    console.error('Erro ao salvar', e);
+    console.error('saveToDB [' + table + ']:', e);
     setSyncStatus('err');
+    if (btnId) setBtnLoading(btnId, false);
+    showToast('❌ Erro ao salvar: ' + (e.message || 'verifique a chave do Supabase'), 'err');
     return null;
   }
 }
@@ -488,8 +592,9 @@ async function deleteFromDB(table, dbid) {
     if(error) throw error;
     setSyncStatus('ok');
   } catch(e) {
-    console.error('Erro ao deletar', e);
+    console.error('deleteFromDB:', e);
     setSyncStatus('err');
+    showToast('❌ Erro ao apagar item', 'err');
   }
 }
 
@@ -499,7 +604,11 @@ async function updateInDB(table, dbid, item) {
     const { error } = await sb.from(table).update({ data: JSON.stringify(item) }).eq('id', dbid);
     if(error) throw error;
     setSyncStatus('ok');
-  } catch(e) { setSyncStatus('err'); }
+  } catch(e) {
+    console.error('updateInDB:', e);
+    setSyncStatus('err');
+    showToast('❌ Erro ao atualizar', 'err');
+  }
 }
 
 async function loadAll() {
@@ -511,25 +620,26 @@ async function loadAll() {
   ]);
   setSyncStatus('ok');
   render();
+
+  // Avisa se a chave parece inválida
+  if (!isValidJWT(getKey())) {
+    document.getElementById('fac-config-warn').style.display = 'block';
+  }
 }
 
 // ========== HELPERS ==========
-const today = () => new Date().toISOString().split('T')[0];
-const fmt = d => d ? new Date(d+'T12:00:00').toLocaleDateString('pt-BR') : '';
+const today  = () => new Date().toISOString().split('T')[0];
+const fmt    = d => d ? new Date(d+'T12:00:00').toLocaleDateString('pt-BR') : '';
 const fmtMoney = v => 'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2});
-const colors = ['#7c3aed','#0d9488','#d97706','#dc2626','#2563eb','#db2777'];
-const initials = n => n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
 
-// Retorna o ISO da segunda-feira da semana corrente
 function getWeekKey() {
   const d = new Date();
-  const day = d.getDay(); // 0=dom
+  const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const mon = new Date(d.setDate(diff));
+  const mon = new Date(new Date().setDate(diff));
   return mon.toISOString().split('T')[0];
 }
 
-// Ordem das abas no sidebar (alfabética)
 const PAGE_IDS = ['agenda','faculdade','finance','fitness','habits','home','mental','notes','work'];
 
 function showPage(id) {
@@ -541,6 +651,7 @@ function showPage(id) {
   render();
 }
 
+// Inicializa campos de data
 document.querySelectorAll('input[type=date]').forEach(i => i.value = today());
 
 // ========== FITNESS ==========
@@ -548,12 +659,15 @@ async function addWorkout(){
   const d={date:document.getElementById('fit-date').value,type:document.getElementById('fit-type').value,
     dur:document.getElementById('fit-dur').value,weight:document.getElementById('fit-weight').value,
     notes:document.getElementById('fit-notes').value};
-  if(!d.date)return;
-  const dbid = await saveToDB('workouts', d);
-  if(dbid) { d._dbid = dbid; cache.workouts.unshift(d); }
-  document.getElementById('fit-notes').value='';
-  document.getElementById('fit-dur').value='';
-  document.getElementById('fit-weight').value='';
+  if(!d.date) return showToast('⚠️ Informe a data do treino','warn');
+  const dbid = await saveToDB('workouts', d, 'btn-fit');
+  if(dbid) {
+    d._dbid = dbid; cache.workouts.unshift(d);
+    showToast('✅ Treino registrado!');
+    document.getElementById('fit-notes').value='';
+    document.getElementById('fit-dur').value='';
+    document.getElementById('fit-weight').value='';
+  }
   renderFitness();
 }
 
@@ -588,11 +702,14 @@ async function addTransaction(){
   const d={type:document.getElementById('fin-type').value,val:parseFloat(document.getElementById('fin-val').value)||0,
     cat:document.getElementById('fin-cat').value,date:document.getElementById('fin-date').value,
     desc:document.getElementById('fin-desc').value};
-  if(!d.val)return;
-  const dbid = await saveToDB('transactions', d);
-  if(dbid) { d._dbid = dbid; cache.transactions.unshift(d); }
-  document.getElementById('fin-val').value='';
-  document.getElementById('fin-desc').value='';
+  if(!d.val) return showToast('⚠️ Informe o valor da transação','warn');
+  const dbid = await saveToDB('transactions', d, 'btn-fin');
+  if(dbid) {
+    d._dbid = dbid; cache.transactions.unshift(d);
+    showToast('✅ Transação adicionada!');
+    document.getElementById('fin-val').value='';
+    document.getElementById('fin-desc').value='';
+  }
   renderFinance();
 }
 
@@ -620,13 +737,16 @@ function renderFinance(){
 
 // ========== TRABALHO ==========
 async function addTask(){
-  const d={task:document.getElementById('work-task').value,proj:document.getElementById('work-proj').value,
+  const d={task:document.getElementById('work-task').value.trim(),proj:document.getElementById('work-proj').value,
     due:document.getElementById('work-due').value,pri:document.getElementById('work-pri').value,done:false};
-  if(!d.task)return;
-  const dbid = await saveToDB('tasks', d);
-  if(dbid) { d._dbid = dbid; cache.tasks.unshift(d); }
-  document.getElementById('work-task').value='';
-  document.getElementById('work-proj').value='';
+  if(!d.task) return showToast('⚠️ Informe o nome da tarefa','warn');
+  const dbid = await saveToDB('tasks', d, 'btn-work');
+  if(dbid) {
+    d._dbid = dbid; cache.tasks.unshift(d);
+    showToast('✅ Tarefa adicionada!');
+    document.getElementById('work-task').value='';
+    document.getElementById('work-proj').value='';
+  }
   renderWork();
 }
 
@@ -669,13 +789,16 @@ function selectMood(el,mood){
 async function saveMentalEntry(){
   const d={date:today(),mood:selectedMood,entry:document.getElementById('mental-entry').value,
     grat:document.getElementById('mental-grat').value};
-  if(!d.mood&&!d.entry)return;
-  const dbid = await saveToDB('mental', d);
-  if(dbid) { d._dbid = dbid; cache.mental.unshift(d); }
-  document.getElementById('mental-entry').value='';
-  document.getElementById('mental-grat').value='';
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
-  selectedMood='';
+  if(!d.mood&&!d.entry) return showToast('⚠️ Selecione um humor ou escreva algo','warn');
+  const dbid = await saveToDB('mental', d, 'btn-mental');
+  if(dbid) {
+    d._dbid = dbid; cache.mental.unshift(d);
+    showToast('✅ Registro salvo!');
+    document.getElementById('mental-entry').value='';
+    document.getElementById('mental-grat').value='';
+    document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+    selectedMood='';
+  }
   renderMental();
 }
 
@@ -698,23 +821,62 @@ function renderMental(){
     </div>`).join('');
 }
 
-// ========== FACULDADE ==========
+// ========== FACULDADE — CORREÇÃO PRINCIPAL ==========
+function setFacMsg(msg, type) {
+  const el = document.getElementById('fac-form-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.color = type === 'err' ? '#fca5a5' : type === 'ok' ? '#86efac' : '#fde68a';
+}
+
 async function addDisciplina() {
   const nome = document.getElementById('fac-nome').value.trim();
-  if (!nome) return;
+
+  // Validação com feedback inline
+  if (!nome) {
+    setFacMsg('⚠️ O nome da disciplina é obrigatório.', 'warn');
+    document.getElementById('fac-nome').focus();
+    return;
+  }
+
+  setFacMsg('', '');
+
+  // Monta o objeto — estudadaSemana como objeto plano (sem undefined)
   const d = {
-    nome,
-    periodo: document.getElementById('fac-periodo').value.trim(),
-    prof: document.getElementById('fac-prof').value.trim(),
-    obs: document.getElementById('fac-obs').value.trim(),
-    estudadaSemana: {} // chave: weekKey, valor: true/false
+    nome:     nome,
+    periodo:  document.getElementById('fac-periodo').value.trim(),
+    prof:     document.getElementById('fac-prof').value.trim(),
+    obs:      document.getElementById('fac-obs').value.trim(),
+    estudadaSemana: {}   // começa vazio; chaves são weekKeys, valor boolean
   };
-  const dbid = await saveToDB('disciplinas', d);
-  if (dbid) { d._dbid = dbid; cache.disciplinas.unshift(d); }
-  document.getElementById('fac-nome').value = '';
-  document.getElementById('fac-periodo').value = '';
-  document.getElementById('fac-prof').value = '';
-  document.getElementById('fac-obs').value = '';
+
+  // Verifica chave antes de tentar salvar
+  if (!isValidJWT(getKey())) {
+    setFacMsg('❌ Chave do Supabase inválida. Veja o aviso acima.', 'err');
+    document.getElementById('fac-config-warn').style.display = 'block';
+    showToast('❌ Chave do Supabase inválida — configure na tela de login', 'err');
+    return;
+  }
+
+  const dbid = await saveToDB('disciplinas', d, 'btn-fac');
+
+  if (dbid) {
+    d._dbid = dbid;
+    cache.disciplinas.unshift(d);
+    showToast('✅ Disciplina "' + nome + '" adicionada!');
+    setFacMsg('✅ Disciplina salva com sucesso!', 'ok');
+
+    // Limpa o formulário
+    document.getElementById('fac-nome').value    = '';
+    document.getElementById('fac-periodo').value = '';
+    document.getElementById('fac-prof').value    = '';
+    document.getElementById('fac-obs').value     = '';
+
+    setTimeout(() => setFacMsg('', ''), 3000);
+  } else {
+    setFacMsg('❌ Falha ao salvar. Verifique a chave do Supabase e as permissões da tabela.', 'err');
+  }
+
   renderFaculdade();
 }
 
@@ -727,24 +889,28 @@ async function toggleEstudei(dbid, i) {
   renderFaculdade();
 }
 
-// Salva as observações editadas inline
 async function saveObs(dbid, i) {
   const val = document.getElementById(`obs-edit-${i}`).value;
   cache.disciplinas[i].obs = val;
   await updateInDB('disciplinas', dbid, cache.disciplinas[i]);
+  showToast('✅ Observação salva!');
   renderFaculdade();
 }
 
 function renderFaculdade() {
   const list = cache.disciplinas;
   const wk = getWeekKey();
-  const total = list.length;
+  const total     = list.length;
   const estudadas = list.filter(d => d.estudadaSemana && d.estudadaSemana[wk]).length;
-  const faltam = total - estudadas;
+  const faltam    = total - estudadas;
 
-  document.getElementById('fac-total').textContent = total;
+  document.getElementById('fac-total').textContent     = total;
   document.getElementById('fac-estudadas').textContent = estudadas;
-  document.getElementById('fac-faltam').textContent = faltam;
+  document.getElementById('fac-faltam').textContent    = faltam;
+
+  // Mostra aviso se chave inválida e houver disciplinas locais sem _dbid
+  const warn = document.getElementById('fac-config-warn');
+  if (warn) warn.style.display = !isValidJWT(getKey()) ? 'block' : 'none';
 
   const disciplinaIcons = ['📚','🔬','📐','💻','🧬','📊','🎨','⚗️','📖','🧮'];
 
@@ -752,7 +918,7 @@ function renderFaculdade() {
     ? '<div style="font-size:13px;color:#555;padding:8px 0">Nenhuma disciplina adicionada ainda.</div>'
     : list.map((d, i) => {
         const feita = d.estudadaSemana && d.estudadaSemana[wk];
-        const icon = disciplinaIcons[i % disciplinaIcons.length];
+        const icon  = disciplinaIcons[i % disciplinaIcons.length];
         return `
         <div class="disciplina-card">
           <div class="disciplina-header">
@@ -763,14 +929,10 @@ function renderFaculdade() {
             </div>
             <button class="delete-btn" onclick="delItem('disciplinas','${d._dbid}',${i})" style="align-self:flex-start">✕</button>
           </div>
-
-          <!-- Checkbox estudei essa semana -->
           <label class="estudei-toggle ${feita ? 'done' : ''}" onclick="toggleEstudei('${d._dbid}',${i})">
             <input type="checkbox" ${feita ? 'checked' : ''} onclick="event.preventDefault()">
             <span class="estudei-label">${feita ? '✅ Estudei essa semana!' : 'Estudei essa semana?'}</span>
           </label>
-
-          <!-- Observações editáveis -->
           <div style="margin-top:10px">
             <label style="margin-bottom:4px">📝 Observações</label>
             <textarea id="obs-edit-${i}" style="min-height:60px;font-size:13px">${d.obs || ''}</textarea>
@@ -784,14 +946,18 @@ function renderFaculdade() {
 
 // ========== AGENDA ==========
 async function addEvent(){
-  const d={title:document.getElementById('ag-title').value,date:document.getElementById('ag-date').value,
+  const d={title:document.getElementById('ag-title').value.trim(),date:document.getElementById('ag-date').value,
     time:document.getElementById('ag-time').value,cat:document.getElementById('ag-cat').value,
     loc:document.getElementById('ag-loc').value};
-  if(!d.title||!d.date)return;
-  const dbid = await saveToDB('events', d);
-  if(dbid) { d._dbid = dbid; cache.events.push(d); cache.events.sort((a,b)=>a.date.localeCompare(b.date)); }
-  document.getElementById('ag-title').value='';
-  document.getElementById('ag-loc').value='';
+  if(!d.title||!d.date) return showToast('⚠️ Informe título e data','warn');
+  const dbid = await saveToDB('events', d, 'btn-ag');
+  if(dbid) {
+    d._dbid = dbid; cache.events.push(d);
+    cache.events.sort((a,b)=>a.date.localeCompare(b.date));
+    showToast('✅ Compromisso adicionado!');
+    document.getElementById('ag-title').value='';
+    document.getElementById('ag-loc').value='';
+  }
   renderAgenda();
 }
 
@@ -820,11 +986,14 @@ function renderAgenda(){
 async function addNote(){
   const d={title:document.getElementById('note-title').value,body:document.getElementById('note-body').value,
     tag:document.getElementById('note-tag').value,date:today()};
-  if(!d.body&&!d.title)return;
-  const dbid = await saveToDB('notes', d);
-  if(dbid) { d._dbid = dbid; cache.notes.unshift(d); }
-  document.getElementById('note-title').value='';
-  document.getElementById('note-body').value='';
+  if(!d.body&&!d.title) return showToast('⚠️ Escreva algo antes de salvar','warn');
+  const dbid = await saveToDB('notes', d, 'btn-note');
+  if(dbid) {
+    d._dbid = dbid; cache.notes.unshift(d);
+    showToast('✅ Nota salva!');
+    document.getElementById('note-title').value='';
+    document.getElementById('note-body').value='';
+  }
   renderNotes();
 }
 
@@ -847,12 +1016,15 @@ function renderNotes(){
 
 // ========== HÁBITOS ==========
 async function addHabit(){
-  const name = document.getElementById('hab-name').value;
-  if(!name) return;
+  const name = document.getElementById('hab-name').value.trim();
+  if(!name) return showToast('⚠️ Informe o nome do hábito','warn');
   const d = { name, dates: [] };
-  const dbid = await saveToDB('habits', d);
-  if(dbid){ d._dbid = dbid; cache.habits.unshift(d); }
-  document.getElementById('hab-name').value = '';
+  const dbid = await saveToDB('habits', d, 'btn-hab');
+  if(dbid){
+    d._dbid = dbid; cache.habits.unshift(d);
+    showToast('✅ Hábito adicionado!');
+    document.getElementById('hab-name').value = '';
+  }
   renderHabits();
 }
 
@@ -938,6 +1110,12 @@ function renderHabits(){
 
 // ========== DELETE ==========
 async function delItem(table, dbid, i){
+  if (!dbid || dbid === 'undefined') {
+    // Item só existe localmente (não foi salvo no DB)
+    cache[table].splice(i, 1);
+    render();
+    return;
+  }
   await deleteFromDB(table, dbid);
   cache[table].splice(i, 1);
   render();
@@ -951,30 +1129,30 @@ function render(){
 // ========== AUTH ==========
 sb.auth.onAuthStateChange((event, session) => {
   const authEl = document.getElementById('auth');
-  const appEl = document.getElementById('app-content');
+  const appEl  = document.getElementById('app-content');
   if (session) {
     authEl.style.display = 'none';
-    appEl.style.display = 'flex';
+    appEl.style.display  = 'flex';
     loadAll();
   } else {
     authEl.style.display = 'flex';
-    appEl.style.display = 'none';
+    appEl.style.display  = 'none';
   }
 });
 
 async function signUp() {
-  const email = document.getElementById('auth-email').value;
+  const email    = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-pass').value;
   const { error } = await sb.auth.signUp({ email, password });
-  if (error) alert(error.message);
-  else alert("Conta criada! Agora faça login.");
+  if (error) showToast('❌ ' + error.message, 'err');
+  else showToast('✅ Conta criada! Agora faça login.');
 }
 
 async function signIn() {
-  const email = document.getElementById('auth-email').value;
+  const email    = document.getElementById('auth-email').value;
   const password = document.getElementById('auth-pass').value;
   const { error } = await sb.auth.signInWithPassword({ email, password });
-  if (error) alert(error.message);
+  if (error) showToast('❌ ' + error.message, 'err');
 }
 
 async function logout() {

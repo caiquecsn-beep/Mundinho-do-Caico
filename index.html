@@ -96,6 +96,39 @@ label{font-size:12px;color:#888;display:block;margin-bottom:4px}
 .delete-btn:hover{color:#f87171;background:#1e1e28}
 select option{background:#1a1a22}
 
+/* FACULDADE */
+.disciplina-card{
+  background:#18181f;border:1px solid #2a2a35;border-radius:12px;
+  padding:14px;margin-bottom:10px;transition:border-color .2s;
+}
+.disciplina-card:hover{border-color:#3a2a5e}
+.disciplina-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.disciplina-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:#1e1b2e;border:1px solid #3b0764;
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0
+}
+.disciplina-name{font-size:14px;font-weight:600;color:#e8e8f0;flex:1}
+.disciplina-period{font-size:11px;color:#666}
+.estudei-toggle{
+  display:flex;align-items:center;gap:8px;
+  background:#0f0f13;border:1px solid #2a2a35;border-radius:8px;
+  padding:8px 12px;cursor:pointer;transition:all .2s;user-select:none;
+}
+.estudei-toggle.done{background:#14532d22;border-color:#14532d}
+.estudei-toggle input[type=checkbox]{
+  width:16px;height:16px;cursor:pointer;accent-color:#7c3aed;flex-shrink:0
+}
+.estudei-label{font-size:13px;color:#aaa;transition:color .2s}
+.estudei-toggle.done .estudei-label{color:#86efac;font-weight:500}
+.disciplina-obs{
+  margin-top:10px;font-size:12px;color:#888;
+  background:#0f0f13;border-radius:8px;padding:8px 10px;
+  border:1px solid #2a2a35;white-space:pre-wrap;line-height:1.5
+}
+.disciplina-actions{display:flex;gap:6px;margin-top:10px;align-items:center}
+.fac-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+
 /* AUTH */
 #auth{position:fixed;inset:0;z-index:100;background:#0f0f13;display:flex;align-items:center;justify-content:center}
 .auth-box{background:#18181f;border:1px solid #2a2a35;border-radius:16px;padding:28px 24px;width:100%;max-width:340px}
@@ -113,6 +146,7 @@ select option{background:#1a1a22}
   .main-content{order:1;overflow-y:auto}
   .page{padding:14px}
   .home-grid{grid-template-columns:repeat(2,1fr)}
+  .fac-stats{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
@@ -134,19 +168,19 @@ select option{background:#1a1a22}
 <!-- APP -->
 <div id="app-content" class="app" style="display:none">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR — ordem alfabética: Agenda, Faculdade, Finanças, Fitness, Hábitos, Home, Mental, Notas, Trabalho -->
   <nav class="sidebar">
     <div class="sidebar-logo">🌍 Mundinho do Caico</div>
 
-    <div class="tab active" onclick="showPage('home')"><span class="icon">🏠</span><span>Home</span></div>
-    <div class="tab" onclick="showPage('fitness')"><span class="icon">💪</span><span>Fitness</span></div>
-    <div class="tab" onclick="showPage('finance')"><span class="icon">💰</span><span>Finanças</span></div>
-    <div class="tab" onclick="showPage('work')"><span class="icon">💼</span><span>Trabalho</span></div>
-    <div class="tab" onclick="showPage('mental')"><span class="icon">🧘</span><span>Mental</span></div>
-    <div class="tab" onclick="showPage('social')"><span class="icon">👥</span><span>Social</span></div>
     <div class="tab" onclick="showPage('agenda')"><span class="icon">📅</span><span>Agenda</span></div>
-    <div class="tab" onclick="showPage('notes')"><span class="icon">📝</span><span>Notas</span></div>
+    <div class="tab" onclick="showPage('faculdade')"><span class="icon">🎓</span><span>Faculdade</span></div>
+    <div class="tab" onclick="showPage('finance')"><span class="icon">💰</span><span>Finanças</span></div>
+    <div class="tab" onclick="showPage('fitness')"><span class="icon">💪</span><span>Fitness</span></div>
     <div class="tab" onclick="showPage('habits')"><span class="icon">📊</span><span>Hábitos</span></div>
+    <div class="tab active" onclick="showPage('home')"><span class="icon">🏠</span><span>Home</span></div>
+    <div class="tab" onclick="showPage('mental')"><span class="icon">🧘</span><span>Mental</span></div>
+    <div class="tab" onclick="showPage('notes')"><span class="icon">📝</span><span>Notas</span></div>
+    <div class="tab" onclick="showPage('work')"><span class="icon">💼</span><span>Trabalho</span></div>
 
     <div class="sidebar-bottom">
       <span id="sync-status" class="sync-ok">☁️ Salvo</span>
@@ -162,45 +196,45 @@ select option{background:#1a1a22}
       <h2>🏠 Home</h2>
       <p style="font-size:13px;color:#666;margin-bottom:18px">Selecione uma área para começar:</p>
       <div class="home-grid">
-        <div class="home-card" onclick="showPage('fitness')">
-          <span class="hc-icon">💪</span>
-          <span class="hc-name">Fitness</span>
-          <span class="hc-desc">Treinos, peso corporal e sequência de dias</span>
+        <div class="home-card" onclick="showPage('agenda')">
+          <span class="hc-icon">📅</span>
+          <span class="hc-name">Agenda</span>
+          <span class="hc-desc">Compromissos e eventos futuros</span>
+        </div>
+        <div class="home-card" onclick="showPage('faculdade')">
+          <span class="hc-icon">🎓</span>
+          <span class="hc-name">Faculdade</span>
+          <span class="hc-desc">Disciplinas, estudos e progresso semanal</span>
         </div>
         <div class="home-card" onclick="showPage('finance')">
           <span class="hc-icon">💰</span>
           <span class="hc-name">Finanças</span>
           <span class="hc-desc">Receitas, despesas e saldo atual</span>
         </div>
-        <div class="home-card" onclick="showPage('work')">
-          <span class="hc-icon">💼</span>
-          <span class="hc-name">Trabalho</span>
-          <span class="hc-desc">Tarefas, projetos e prazos</span>
+        <div class="home-card" onclick="showPage('fitness')">
+          <span class="hc-icon">💪</span>
+          <span class="hc-name">Fitness</span>
+          <span class="hc-desc">Treinos, peso corporal e sequência de dias</span>
+        </div>
+        <div class="home-card" onclick="showPage('habits')">
+          <span class="hc-icon">📊</span>
+          <span class="hc-name">Hábitos</span>
+          <span class="hc-desc">Rastreador de hábitos e consistência</span>
         </div>
         <div class="home-card" onclick="showPage('mental')">
           <span class="hc-icon">🧘</span>
           <span class="hc-name">Mental</span>
           <span class="hc-desc">Humor diário, reflexões e gratidão</span>
         </div>
-        <div class="home-card" onclick="showPage('social')">
-          <span class="hc-icon">👥</span>
-          <span class="hc-name">Social</span>
-          <span class="hc-desc">Contatos e frequência de conversa</span>
-        </div>
-        <div class="home-card" onclick="showPage('agenda')">
-          <span class="hc-icon">📅</span>
-          <span class="hc-name">Agenda</span>
-          <span class="hc-desc">Compromissos e eventos futuros</span>
-        </div>
         <div class="home-card" onclick="showPage('notes')">
           <span class="hc-icon">📝</span>
           <span class="hc-name">Notas</span>
           <span class="hc-desc">Ideias, planos e reflexões escritas</span>
         </div>
-        <div class="home-card" onclick="showPage('habits')">
-          <span class="hc-icon">📊</span>
-          <span class="hc-name">Hábitos</span>
-          <span class="hc-desc">Rastreador de hábitos e consistência</span>
+        <div class="home-card" onclick="showPage('work')">
+          <span class="hc-icon">💼</span>
+          <span class="hc-name">Trabalho</span>
+          <span class="hc-desc">Tarefas, projetos e prazos</span>
         </div>
       </div>
     </div>
@@ -319,25 +353,28 @@ select option{background:#1a1a22}
       <div id="mental-list"></div>
     </div>
 
-    <!-- SOCIAL -->
-    <div class="page" id="page-social">
-      <h2>👥 Rede Social Real</h2>
-      <div class="card">
-        <h3>Adicionar contato</h3>
-        <div class="grid2">
-          <div class="form-row"><label>Nome</label><input type="text" id="soc-name" placeholder="João Silva"></div>
-          <div class="form-row"><label>Relação</label>
-            <select id="soc-rel"><option>Amigo</option><option>Familiar</option><option>Colega</option><option>Mentor</option><option>Outro</option></select>
-          </div>
-        </div>
-        <div class="form-row"><label>Última conversa</label><input type="date" id="soc-last"></div>
-        <div class="form-row"><label>Notas</label><input type="text" id="soc-notes" placeholder="Gosta de futebol, mora em SP..."></div>
-        <button class="btn" onclick="addContact()">Adicionar</button>
+    <!-- FACULDADE -->
+    <div class="page" id="page-faculdade">
+      <h2>🎓 Faculdade</h2>
+      <div class="fac-stats">
+        <div class="stat"><div class="stat-val" id="fac-total">0</div><div class="stat-lbl">Disciplinas</div></div>
+        <div class="stat"><div class="stat-val" id="fac-estudadas" style="color:#86efac">0</div><div class="stat-lbl">Estudadas essa semana</div></div>
+        <div class="stat"><div class="stat-val" id="fac-faltam" style="color:#fca5a5">0</div><div class="stat-lbl">Faltam estudar</div></div>
       </div>
-      <div class="section-title">Precisa entrar em contato</div>
-      <div id="soc-alert-list"></div>
-      <div class="section-title">Todos os contatos</div>
-      <div id="soc-list"></div>
+
+      <div class="card">
+        <h3>Adicionar disciplina</h3>
+        <div class="grid2">
+          <div class="form-row"><label>Nome da disciplina</label><input type="text" id="fac-nome" placeholder="Cálculo II..."></div>
+          <div class="form-row"><label>Período / Semestre</label><input type="text" id="fac-periodo" placeholder="3º semestre"></div>
+        </div>
+        <div class="form-row"><label>Professor(a)</label><input type="text" id="fac-prof" placeholder="Prof. Dr. João..."></div>
+        <div class="form-row"><label>Observações iniciais</label><textarea id="fac-obs" placeholder="Próxima prova, tópicos importantes, dificuldades..." style="min-height:60px"></textarea></div>
+        <button class="btn" onclick="addDisciplina()">Adicionar disciplina</button>
+      </div>
+
+      <div class="section-title">Minhas disciplinas</div>
+      <div id="fac-list"></div>
     </div>
 
     <!-- AGENDA -->
@@ -403,7 +440,7 @@ const sb = createClient(
 );
 
 const cache = {
-  workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[], habits:[]
+  workouts:[], transactions:[], tasks:[], mental:[], contacts:[], events:[], notes:[], habits:[], disciplinas:[]
 };
 
 function setSyncStatus(status) {
@@ -470,7 +507,7 @@ async function loadAll() {
   await Promise.all([
     loadFromDB('workouts'), loadFromDB('transactions'), loadFromDB('tasks'),
     loadFromDB('mental'), loadFromDB('contacts'), loadFromDB('events'),
-    loadFromDB('notes'), loadFromDB('habits')
+    loadFromDB('notes'), loadFromDB('habits'), loadFromDB('disciplinas')
   ]);
   setSyncStatus('ok');
   render();
@@ -483,7 +520,17 @@ const fmtMoney = v => 'R$'+Number(v).toLocaleString('pt-BR',{minimumFractionDigi
 const colors = ['#7c3aed','#0d9488','#d97706','#dc2626','#2563eb','#db2777'];
 const initials = n => n.split(' ').map(x=>x[0]).join('').toUpperCase().slice(0,2);
 
-const PAGE_IDS = ['home','fitness','finance','work','mental','social','agenda','notes','habits'];
+// Retorna o ISO da segunda-feira da semana corrente
+function getWeekKey() {
+  const d = new Date();
+  const day = d.getDay(); // 0=dom
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const mon = new Date(d.setDate(diff));
+  return mon.toISOString().split('T')[0];
+}
+
+// Ordem das abas no sidebar (alfabética)
+const PAGE_IDS = ['agenda','faculdade','finance','fitness','habits','home','mental','notes','work'];
 
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -651,51 +698,88 @@ function renderMental(){
     </div>`).join('');
 }
 
-// ========== SOCIAL ==========
-async function addContact(){
-  const d={name:document.getElementById('soc-name').value,rel:document.getElementById('soc-rel').value,
-    last:document.getElementById('soc-last').value,notes:document.getElementById('soc-notes').value};
-  if(!d.name)return;
-  const dbid = await saveToDB('contacts', d);
-  if(dbid) { d._dbid = dbid; cache.contacts.push(d); }
-  document.getElementById('soc-name').value='';
-  document.getElementById('soc-notes').value='';
-  renderSocial();
-}
-
-async function updateLastContact(dbid, i){
-  cache.contacts[i].last = today();
-  await updateInDB('contacts', dbid, cache.contacts[i]);
-  renderSocial();
-}
-
-function renderSocial(){
-  const list = cache.contacts;
-  const now=new Date();
-  const daysSince=last=>last?Math.floor((now-new Date(last+'T12:00:00'))/864e5):999;
-  const alertList=list.filter(c=>daysSince(c.last)>=14);
-  const renderContact=(c,i)=>{
-    const ds=daysSince(c.last);
-    const urgency=ds>=30?'badge-red':ds>=14?'badge-yellow':'badge-green';
-    const dsLabel=ds===999?'Nunca':ds===0?'Hoje':ds===1?'Ontem':ds+'d atrás';
-    const col=colors[i%colors.length];
-    return `<div class="item-row">
-      <div class="contact-avatar" style="background:${col}22;color:${col}">${initials(c.name)}</div>
-      <div style="flex:1">
-        <div style="font-size:14px;font-weight:500">${c.name}</div>
-        <div class="days-ago">${c.rel}${c.notes?' · '+c.notes:''}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
-        <span class="badge ${urgency}">${dsLabel}</span>
-        <button class="btn btn-ghost btn-sm" onclick="updateLastContact('${c._dbid}',${i})">Conversei</button>
-      </div>
-      <button class="delete-btn" onclick="delItem('contacts','${c._dbid}',${i})">✕</button>
-    </div>`;
+// ========== FACULDADE ==========
+async function addDisciplina() {
+  const nome = document.getElementById('fac-nome').value.trim();
+  if (!nome) return;
+  const d = {
+    nome,
+    periodo: document.getElementById('fac-periodo').value.trim(),
+    prof: document.getElementById('fac-prof').value.trim(),
+    obs: document.getElementById('fac-obs').value.trim(),
+    estudadaSemana: {} // chave: weekKey, valor: true/false
   };
-  document.getElementById('soc-alert-list').innerHTML=alertList.length
-    ? alertList.map((c)=>renderContact(c,list.indexOf(c))).join('')
-    : '<div style="font-size:13px;color:#555;padding:8px 0">Todos em dia! 🎉</div>';
-  document.getElementById('soc-list').innerHTML=list.map((c,i)=>renderContact(c,i)).join('');
+  const dbid = await saveToDB('disciplinas', d);
+  if (dbid) { d._dbid = dbid; cache.disciplinas.unshift(d); }
+  document.getElementById('fac-nome').value = '';
+  document.getElementById('fac-periodo').value = '';
+  document.getElementById('fac-prof').value = '';
+  document.getElementById('fac-obs').value = '';
+  renderFaculdade();
+}
+
+async function toggleEstudei(dbid, i) {
+  const wk = getWeekKey();
+  const disc = cache.disciplinas[i];
+  if (!disc.estudadaSemana) disc.estudadaSemana = {};
+  disc.estudadaSemana[wk] = !disc.estudadaSemana[wk];
+  await updateInDB('disciplinas', dbid, disc);
+  renderFaculdade();
+}
+
+// Salva as observações editadas inline
+async function saveObs(dbid, i) {
+  const val = document.getElementById(`obs-edit-${i}`).value;
+  cache.disciplinas[i].obs = val;
+  await updateInDB('disciplinas', dbid, cache.disciplinas[i]);
+  renderFaculdade();
+}
+
+function renderFaculdade() {
+  const list = cache.disciplinas;
+  const wk = getWeekKey();
+  const total = list.length;
+  const estudadas = list.filter(d => d.estudadaSemana && d.estudadaSemana[wk]).length;
+  const faltam = total - estudadas;
+
+  document.getElementById('fac-total').textContent = total;
+  document.getElementById('fac-estudadas').textContent = estudadas;
+  document.getElementById('fac-faltam').textContent = faltam;
+
+  const disciplinaIcons = ['📚','🔬','📐','💻','🧬','📊','🎨','⚗️','📖','🧮'];
+
+  document.getElementById('fac-list').innerHTML = list.length === 0
+    ? '<div style="font-size:13px;color:#555;padding:8px 0">Nenhuma disciplina adicionada ainda.</div>'
+    : list.map((d, i) => {
+        const feita = d.estudadaSemana && d.estudadaSemana[wk];
+        const icon = disciplinaIcons[i % disciplinaIcons.length];
+        return `
+        <div class="disciplina-card">
+          <div class="disciplina-header">
+            <div class="disciplina-icon">${icon}</div>
+            <div style="flex:1;min-width:0">
+              <div class="disciplina-name">${d.nome}</div>
+              <div class="disciplina-period">${[d.periodo, d.prof].filter(Boolean).join(' · ')}</div>
+            </div>
+            <button class="delete-btn" onclick="delItem('disciplinas','${d._dbid}',${i})" style="align-self:flex-start">✕</button>
+          </div>
+
+          <!-- Checkbox estudei essa semana -->
+          <label class="estudei-toggle ${feita ? 'done' : ''}" onclick="toggleEstudei('${d._dbid}',${i})">
+            <input type="checkbox" ${feita ? 'checked' : ''} onclick="event.preventDefault()">
+            <span class="estudei-label">${feita ? '✅ Estudei essa semana!' : 'Estudei essa semana?'}</span>
+          </label>
+
+          <!-- Observações editáveis -->
+          <div style="margin-top:10px">
+            <label style="margin-bottom:4px">📝 Observações</label>
+            <textarea id="obs-edit-${i}" style="min-height:60px;font-size:13px">${d.obs || ''}</textarea>
+          </div>
+          <div class="disciplina-actions">
+            <button class="btn btn-sm" onclick="saveObs('${d._dbid}',${i})">Salvar obs.</button>
+          </div>
+        </div>`;
+      }).join('');
 }
 
 // ========== AGENDA ==========
@@ -861,7 +945,7 @@ async function delItem(table, dbid, i){
 
 function render(){
   renderFitness(); renderFinance(); renderWork(); renderMental();
-  renderSocial(); renderAgenda(); renderNotes(); renderHabits();
+  renderAgenda(); renderNotes(); renderHabits(); renderFaculdade();
 }
 
 // ========== AUTH ==========

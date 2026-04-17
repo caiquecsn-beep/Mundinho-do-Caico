@@ -9,75 +9,63 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#0f0f13;color:#e8e8f0;min-height:100vh;font-size:15px}
 
-/* ===== LAYOUT PRINCIPAL ===== */
 .app{display:flex;height:100vh;overflow:hidden}
 
-/* ===== SIDEBAR ===== */
+/* SIDEBAR */
 .sidebar{
-  width:200px;
-  flex-shrink:0;
-  background:#18181f;
-  border-right:1px solid #2a2a35;
-  display:flex;
-  flex-direction:column;
-  padding:12px 8px;
-  gap:4px;
-  overflow-y:auto;
+  width:200px;flex-shrink:0;background:#18181f;
+  border-right:1px solid #2a2a35;display:flex;flex-direction:column;
+  padding:12px 8px;gap:4px;overflow-y:auto;
 }
 .sidebar-logo{
-  font-size:13px;
-  font-weight:700;
-  color:#a78bfa;
-  padding:6px 10px 14px;
-  letter-spacing:.3px;
-  border-bottom:1px solid #2a2a35;
-  margin-bottom:6px;
+  font-size:13px;font-weight:700;color:#a78bfa;
+  padding:6px 10px 14px;letter-spacing:.3px;
+  border-bottom:1px solid #2a2a35;margin-bottom:6px;
 }
 .tab{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:9px 10px;
-  cursor:pointer;
-  border-radius:8px;
-  color:#888;
-  font-size:13px;
-  font-weight:500;
-  transition:background .15s,color .15s;
-  white-space:nowrap;
+  display:flex;align-items:center;gap:10px;padding:9px 10px;
+  cursor:pointer;border-radius:8px;color:#888;font-size:13px;
+  font-weight:500;transition:background .15s,color .15s;white-space:nowrap;
 }
 .tab .icon{font-size:16px;flex-shrink:0}
 .tab.active{color:#a78bfa;background:#1e1b2e}
 .tab:hover:not(.active){color:#c4b5fd;background:#1a1a25}
 .sidebar-bottom{margin-top:auto;padding-top:10px;border-top:1px solid #2a2a35}
-#sync-status{
-  font-size:11px;padding:4px 8px;border-radius:20px;
-  display:block;margin-bottom:8px;text-align:center;
-}
+#sync-status{font-size:11px;padding:4px 8px;border-radius:20px;display:block;margin-bottom:8px;text-align:center}
 .sync-ok{background:#14532d;color:#86efac}
 .sync-err{background:#7f1d1d;color:#fca5a5}
 .sync-loading{background:#1e3a5f;color:#93c5fd}
 
-/* ===== CONTEÚDO PRINCIPAL ===== */
-.main-content{
-  flex:1;
-  overflow-y:auto;
-  display:flex;
-  flex-direction:column;
-}
-
-/* ===== PÁGINAS ===== */
+/* MAIN */
+.main-content{flex:1;overflow-y:auto;display:flex;flex-direction:column}
 .page{display:none;flex:1;padding:20px}
 .page.active{display:block}
 
-/* ===== COMPONENTES ===== */
+/* HOME CARDS */
+.home-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:14px;
+  margin-top:6px;
+}
+.home-card{
+  background:#18181f;border:1px solid #2a2a35;border-radius:14px;
+  padding:20px 16px;cursor:pointer;
+  transition:border-color .2s,background .2s,transform .15s;
+  display:flex;flex-direction:column;align-items:flex-start;gap:10px;
+}
+.home-card:hover{border-color:#7c3aed;background:#1e1b2e;transform:translateY(-2px)}
+.home-card .hc-icon{font-size:28px}
+.home-card .hc-name{font-size:13px;font-weight:600;color:#e8e8f0}
+.home-card .hc-desc{font-size:11px;color:#666;line-height:1.4}
+
+/* COMPONENTES */
 h2{font-size:17px;font-weight:600;margin-bottom:14px;color:#e8e8f0}
 h3{font-size:14px;font-weight:600;margin-bottom:8px;color:#c4b5fd}
 .card{background:#18181f;border:1px solid #2a2a35;border-radius:12px;padding:14px;margin-bottom:12px}
 .btn{background:#7c3aed;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500}
 .btn:hover{background:#6d28d9}
 .btn-sm{padding:5px 10px;font-size:12px}
-.btn-danger{background:#991b1b}.btn-danger:hover{background:#7f1d1d}
 .btn-ghost{background:transparent;border:1px solid #3a3a4a;color:#aaa}
 .btn-ghost:hover{background:#2a2a35;color:#e8e8f0}
 input,select,textarea{background:#0f0f13;border:1px solid #2a2a35;border-radius:8px;padding:8px 10px;color:#e8e8f0;font-size:13px;width:100%;outline:none}
@@ -108,33 +96,23 @@ label{font-size:12px;color:#888;display:block;margin-bottom:4px}
 .delete-btn:hover{color:#f87171;background:#1e1e28}
 select option{background:#1a1a22}
 
-/* ===== AUTH ===== */
-#auth{
-  position:fixed;inset:0;z-index:100;
-  background:#0f0f13;
-  display:flex;align-items:center;justify-content:center;
-}
-.auth-box{
-  background:#18181f;border:1px solid #2a2a35;border-radius:16px;
-  padding:28px 24px;width:100%;max-width:340px;
-}
+/* AUTH */
+#auth{position:fixed;inset:0;z-index:100;background:#0f0f13;display:flex;align-items:center;justify-content:center}
+.auth-box{background:#18181f;border:1px solid #2a2a35;border-radius:16px;padding:28px 24px;width:100%;max-width:340px}
 .auth-box h2{text-align:center;margin-bottom:20px;color:#a78bfa}
 .auth-box .form-row{margin-bottom:12px}
 .auth-actions{display:flex;gap:8px;margin-top:4px}
 .auth-actions .btn{flex:1}
 
-/* ===== MOBILE: sidebar vira bottom nav ===== */
+/* MOBILE */
 @media(max-width:600px){
   .app{flex-direction:column}
-  .sidebar{
-    width:100%;height:auto;flex-direction:row;
-    border-right:none;border-top:1px solid #2a2a35;
-    order:2;padding:4px;gap:0;overflow-x:auto;
-  }
+  .sidebar{width:100%;height:auto;flex-direction:row;border-right:none;border-top:1px solid #2a2a35;order:2;padding:4px;gap:0;overflow-x:auto}
   .sidebar-logo,.sidebar-bottom{display:none}
   .tab{flex-direction:column;gap:2px;font-size:10px;padding:8px 10px;flex:1;justify-content:center}
   .main-content{order:1;overflow-y:auto}
   .page{padding:14px}
+  .home-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -156,38 +134,19 @@ select option{background:#1a1a22}
 <!-- APP -->
 <div id="app-content" class="app" style="display:none">
 
-  <!-- SIDEBAR LATERAL -->
+  <!-- SIDEBAR -->
   <nav class="sidebar">
     <div class="sidebar-logo">🌍 Mundinho do Caico</div>
 
-    <div class="tab active" onclick="showPage('home')">
-      <span class="icon">🏠</span><span>home</span>
-    </div>
-    
-    <div class="tab active" onclick="showPage('fitness')">
-      <span class="icon">💪</span><span>Fitness</span>
-    </div>
-    <div class="tab" onclick="showPage('finance')">
-      <span class="icon">💰</span><span>Finanças</span>
-    </div>
-    <div class="tab" onclick="showPage('work')">
-      <span class="icon">💼</span><span>Trabalho</span>
-    </div>
-    <div class="tab" onclick="showPage('mental')">
-      <span class="icon">🧘</span><span>Mental</span>
-    </div>
-    <div class="tab" onclick="showPage('social')">
-      <span class="icon">👥</span><span>Social</span>
-    </div>
-    <div class="tab" onclick="showPage('agenda')">
-      <span class="icon">📅</span><span>Agenda</span>
-    </div>
-    <div class="tab" onclick="showPage('notes')">
-      <span class="icon">📝</span><span>Notas</span>
-    </div>
-    <div class="tab" onclick="showPage('habits')">
-  <span class="icon">📊</span><span>Hábitos</span>
-</div>
+    <div class="tab active" onclick="showPage('home')"><span class="icon">🏠</span><span>Home</span></div>
+    <div class="tab" onclick="showPage('fitness')"><span class="icon">💪</span><span>Fitness</span></div>
+    <div class="tab" onclick="showPage('finance')"><span class="icon">💰</span><span>Finanças</span></div>
+    <div class="tab" onclick="showPage('work')"><span class="icon">💼</span><span>Trabalho</span></div>
+    <div class="tab" onclick="showPage('mental')"><span class="icon">🧘</span><span>Mental</span></div>
+    <div class="tab" onclick="showPage('social')"><span class="icon">👥</span><span>Social</span></div>
+    <div class="tab" onclick="showPage('agenda')"><span class="icon">📅</span><span>Agenda</span></div>
+    <div class="tab" onclick="showPage('notes')"><span class="icon">📝</span><span>Notas</span></div>
+    <div class="tab" onclick="showPage('habits')"><span class="icon">📊</span><span>Hábitos</span></div>
 
     <div class="sidebar-bottom">
       <span id="sync-status" class="sync-ok">☁️ Salvo</span>
@@ -197,17 +156,59 @@ select option{background:#1a1a22}
 
   <!-- CONTEÚDO -->
   <div class="main-content">
-    
-<!-- HOME -->
-  <div class="page active" id="page-home">
-    <h2>🏠 Início</h2>
-    <div class="grid3" id="Home-menu"></div>
-  </div>
+
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <h2>🏠 Home</h2>
+      <p style="font-size:13px;color:#666;margin-bottom:18px">Selecione uma área para começar:</p>
+      <div class="home-grid">
+        <div class="home-card" onclick="showPage('fitness')">
+          <span class="hc-icon">💪</span>
+          <span class="hc-name">Fitness</span>
+          <span class="hc-desc">Treinos, peso corporal e sequência de dias</span>
+        </div>
+        <div class="home-card" onclick="showPage('finance')">
+          <span class="hc-icon">💰</span>
+          <span class="hc-name">Finanças</span>
+          <span class="hc-desc">Receitas, despesas e saldo atual</span>
+        </div>
+        <div class="home-card" onclick="showPage('work')">
+          <span class="hc-icon">💼</span>
+          <span class="hc-name">Trabalho</span>
+          <span class="hc-desc">Tarefas, projetos e prazos</span>
+        </div>
+        <div class="home-card" onclick="showPage('mental')">
+          <span class="hc-icon">🧘</span>
+          <span class="hc-name">Mental</span>
+          <span class="hc-desc">Humor diário, reflexões e gratidão</span>
+        </div>
+        <div class="home-card" onclick="showPage('social')">
+          <span class="hc-icon">👥</span>
+          <span class="hc-name">Social</span>
+          <span class="hc-desc">Contatos e frequência de conversa</span>
+        </div>
+        <div class="home-card" onclick="showPage('agenda')">
+          <span class="hc-icon">📅</span>
+          <span class="hc-name">Agenda</span>
+          <span class="hc-desc">Compromissos e eventos futuros</span>
+        </div>
+        <div class="home-card" onclick="showPage('notes')">
+          <span class="hc-icon">📝</span>
+          <span class="hc-name">Notas</span>
+          <span class="hc-desc">Ideias, planos e reflexões escritas</span>
+        </div>
+        <div class="home-card" onclick="showPage('habits')">
+          <span class="hc-icon">📊</span>
+          <span class="hc-name">Hábitos</span>
+          <span class="hc-desc">Rastreador de hábitos e consistência</span>
+        </div>
+      </div>
+    </div>
 
     <!-- FITNESS -->
     <div class="page" id="page-fitness">
       <h2>💪 Fitness & Saúde</h2>
-      <div class="grid3" id="fit-stats">
+      <div class="grid3">
         <div class="stat"><div class="stat-val" id="fit-total">0</div><div class="stat-lbl">Treinos total</div></div>
         <div class="stat"><div class="stat-val" id="fit-week">0</div><div class="stat-lbl">Essa semana</div></div>
         <div class="stat"><div class="stat-val" id="fit-streak">0</div><div class="stat-lbl">Sequência dias</div></div>
@@ -318,7 +319,7 @@ select option{background:#1a1a22}
       <div id="mental-list"></div>
     </div>
 
-    <!-- REDE SOCIAL -->
+    <!-- SOCIAL -->
     <div class="page" id="page-social">
       <h2>👥 Rede Social Real</h2>
       <div class="card">
@@ -378,21 +379,17 @@ select option{background:#1a1a22}
       </div>
       <div id="notes-list"></div>
     </div>
-    
+
     <!-- HÁBITOS -->
-<div class="page" id="page-habits">
-  <h2>📊 Habit Tracker</h2>
-
-  <div class="card">
-    <h3>Novo hábito</h3>
-    <div class="form-row">
-      <input type="text" id="hab-name" placeholder="Ex: Ler 10 páginas">
+    <div class="page" id="page-habits">
+      <h2>📊 Habit Tracker</h2>
+      <div class="card">
+        <h3>Novo hábito</h3>
+        <div class="form-row"><input type="text" id="hab-name" placeholder="Ex: Ler 10 páginas"></div>
+        <button class="btn" onclick="addHabit()">Adicionar</button>
+      </div>
+      <div id="habits-list"></div>
     </div>
-    <button class="btn" onclick="addHabit()">Adicionar</button>
-  </div>
-
-  <div id="habits-list"></div>
-</div>
 
   </div><!-- /main-content -->
 </div><!-- /app -->
@@ -471,10 +468,10 @@ async function updateInDB(table, dbid, item) {
 async function loadAll() {
   setSyncStatus('loading');
   await Promise.all([
-  loadFromDB('workouts'), loadFromDB('transactions'), loadFromDB('tasks'),
-  loadFromDB('mental'), loadFromDB('contacts'), loadFromDB('events'), loadFromDB('notes'),
-  loadFromDB('habits')
-]);
+    loadFromDB('workouts'), loadFromDB('transactions'), loadFromDB('tasks'),
+    loadFromDB('mental'), loadFromDB('contacts'), loadFromDB('events'),
+    loadFromDB('notes'), loadFromDB('habits')
+  ]);
   setSyncStatus('ok');
   render();
 }
@@ -493,11 +490,10 @@ function showPage(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   const idx = PAGE_IDS.indexOf(id);
-  document.querySelectorAll('.tab')[idx].classList.add('active');
+  if(idx >= 0) document.querySelectorAll('.tab')[idx].classList.add('active');
   render();
 }
 
-// Set today's date on all date inputs
 document.querySelectorAll('input[type=date]').forEach(i => i.value = today());
 
 // ========== FITNESS ==========
@@ -764,23 +760,14 @@ function renderNotes(){
       <div style="font-size:11px;color:#555;margin-top:6px">${fmt(n.date)}</div>
     </div>`).join('');
 }
-// ========== HÁBITOS ==========
 
+// ========== HÁBITOS ==========
 async function addHabit(){
   const name = document.getElementById('hab-name').value;
   if(!name) return;
-
-  const d = {
-    name,
-    dates: []
-  };
-
+  const d = { name, dates: [] };
   const dbid = await saveToDB('habits', d);
-  if(dbid){
-    d._dbid = dbid;
-    cache.habits.unshift(d);
-  }
-
+  if(dbid){ d._dbid = dbid; cache.habits.unshift(d); }
   document.getElementById('hab-name').value = '';
   renderHabits();
 }
@@ -788,13 +775,11 @@ async function addHabit(){
 async function toggleHabit(dbid, i){
   const todayDate = today();
   const habit = cache.habits[i];
-
   if(habit.dates.includes(todayDate)){
     habit.dates = habit.dates.filter(d => d !== todayDate);
   } else {
     habit.dates.push(todayDate);
   }
-
   await updateInDB('habits', dbid, habit);
   renderHabits();
 }
@@ -803,143 +788,70 @@ async function toggleHabitDate(dbid, i){
   const input = document.getElementById(`habit-date-${i}`);
   const selectedDate = input.value;
   if(!selectedDate) return;
-
   const habit = cache.habits[i];
-
   if(habit.dates.includes(selectedDate)){
     habit.dates = habit.dates.filter(d => d !== selectedDate);
   } else {
     habit.dates.push(selectedDate);
   }
-
   await updateInDB('habits', dbid, habit);
   renderHabits();
 }
-async function confirmDelete(table, dbid, i){
-  const ok = confirm("Tem certeza que deseja apagar este hábito?");
-  
-  if(!ok) return;
 
+async function confirmDelete(table, dbid, i){
+  if(!confirm("Tem certeza que deseja apagar este hábito?")) return;
   await delItem(table, dbid, i);
 }
-// 🔥 streak (dias seguidos)
+
 function calcStreak(dates){
   const sorted = [...dates].sort().reverse();
-  let streak = 0;
-  let prev = null;
-
+  let streak = 0, prev = null;
   for(const d of sorted){
-    if(!prev){
-      streak = 1;
-      prev = d;
-      continue;
-    }
+    if(!prev){ streak=1; prev=d; continue; }
     const diff = (new Date(prev) - new Date(d)) / 864e5;
-    if(diff <= 1){
-      streak++;
-      prev = d;
-    } else break;
+    if(diff<=1){ streak++; prev=d; } else break;
   }
-
   return streak;
 }
 
-// 📅 mini calendário (últimos 7 dias)
 function renderWeek(dates){
   const days = [];
-
-  for(let i = 6; i >= 0; i--){
-    const d = new Date(Date.now() - i * 864e5).toISOString().split('T')[0];
-
-    days.push(`
-      <div style="
-        width:22px;height:22px;border-radius:6px;
-        display:flex;align-items:center;justify-content:center;
-        font-size:10px;
-        background:${dates.includes(d) ? '#7c3aed' : '#1e1e28'};
-        color:${dates.includes(d) ? '#fff' : '#555'};
-      ">
-        ${new Date(d).getDate()}
-      </div>
-    `);
+  for(let i=6;i>=0;i--){
+    const d = new Date(Date.now() - i*864e5).toISOString().split('T')[0];
+    days.push(`<div style="width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;background:${dates.includes(d)?'#7c3aed':'#1e1e28'};color:${dates.includes(d)?'#fff':'#555'}">${new Date(d).getDate()}</div>`);
   }
-
   return `<div style="display:flex;gap:4px">${days.join('')}</div>`;
 }
 
-// 🎯 render principal
 function renderHabits(){
   const list = cache.habits;
-
   document.getElementById('habits-list').innerHTML = list.map((h,i)=>{
-
     const total = h.dates.length;
-
     const firstDate = h.dates.length ? [...h.dates].sort()[0] : null;
-
-    const daysSinceStart = firstDate 
-      ? Math.floor((new Date() - new Date(firstDate)) / 864e5) + 1 
-      : 0;
-
-    const consistency = daysSinceStart
-      ? Math.round((total / daysSinceStart) * 100)
-      : 0;
-
-    return `
-      <div class="card">
-
-  <div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start">
-
-    <!-- ESQUERDA -->
-    <div style="flex:1">
-
-      <div style="font-weight:600;margin-bottom:8px">
-        ${h.name}
+    const daysSinceStart = firstDate ? Math.floor((new Date() - new Date(firstDate)) / 864e5) + 1 : 0;
+    const consistency = daysSinceStart ? Math.round((total / daysSinceStart) * 100) : 0;
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;gap:24px;align-items:flex-start">
+        <div style="flex:1">
+          <div style="font-weight:600;margin-bottom:8px">${h.name}</div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px">
+            <input type="date" id="habit-date-${i}" value="${today()}" style="width:130px;font-size:11px;padding:4px">
+            <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">Marcar</button>
+          </div>
+          ${renderWeek(h.dates)}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;padding-right:20px;min-width:140px;align-items:flex-start">
+          <div class="days-ago">🔥 ${calcStreak(h.dates)} dias seguidos</div>
+          <div class="days-ago">📊 ${consistency}% de consistência</div>
+          <div class="days-ago">📆 ${total} dias praticados</div>
+          <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">${h.dates.includes(today())?'✔️ Hoje':'Marcar hoje'}</button>
+          <button class="delete-btn" onclick="confirmDelete('habits','${h._dbid}',${i})">✕</button>
+        </div>
       </div>
-
-      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px">
-        <input type="date" id="habit-date-${i}" 
-          value="${today()}"
-          style="width:130px;font-size:11px;padding:4px">
-
-        <button class="btn btn-sm" onclick="toggleHabitDate('${h._dbid}',${i})">
-          Marcar
-        </button>
-      </div>
-
-      ${renderWeek(h.dates)}
-
-    </div>
-
-    <!-- DIREITA (MAIS CENTRALIZADA) -->
-    <div style="
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-      padding-right:20px;
-      min-width:140px;
-      align-items:flex-start;
-    ">
-
-      <div class="days-ago">🔥 ${calcStreak(h.dates)} dias seguidos</div>
-      <div class="days-ago">📊 ${consistency}% de consistência</div>
-      <div class="days-ago">📆 ${total} dias praticados</div>
-
-      <button class="btn btn-sm" onclick="toggleHabit('${h._dbid}',${i})">
-        ${h.dates.includes(today()) ? '✔️ Hoje' : 'Marcar hoje'}
-      </button>
-
-      <button class="delete-btn" onclick="confirmDelete('habits','${h._dbid}',${i})">✕</button>
-
-    </div>
-
-  </div>
-
-</div>
-    `;
-
+    </div>`;
   }).join('');
 }
+
 // ========== DELETE ==========
 async function delItem(table, dbid, i){
   await deleteFromDB(table, dbid);
@@ -948,16 +860,8 @@ async function delItem(table, dbid, i){
 }
 
 function render(){
-  renderHome();
-
-  renderFitness();
-  renderFinance();
-  renderWork();
-  renderMental();
-  renderSocial();
-  renderAgenda();
-  renderNotes();
-  renderHabits();
+  renderFitness(); renderFinance(); renderWork(); renderMental();
+  renderSocial(); renderAgenda(); renderNotes(); renderHabits();
 }
 
 // ========== AUTH ==========

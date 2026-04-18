@@ -7,15 +7,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
-  --bg-deep: #0f111a;
-  --bg-card: #1a1d29;
+  --bg-deep: #0a0b10;
+  --bg-sidebar: #11131c;
+  --bg-card: rgba(26, 29, 41, 0.8);
   --accent: #8b5cf6;
-  --accent-soft: #2d2b45;
-  --text-main: #f1f1f7;
+  --accent-hover: #7c3aed;
+  --text-main: #f8fafc;
   --text-dim: #94a3b8;
-  --border: rgba(255, 255, 255, 0.08);
-  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+  --border: rgba(255, 255, 255, 0.06);
+  --glass: rgba(255, 255, 255, 0.03);
+  --danger: #ef4444;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
@@ -23,125 +24,442 @@
 body { 
   font-family: 'Inter', system-ui, -apple-system, sans-serif; 
   background: var(--bg-deep); 
-  color: var(--text-main); 
-  line-height: 1.5;
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
-/* LAYOUT PREMIUM */
-.app { display: flex; height: 100vh; overflow: hidden; background: radial-gradient(circle at top right, #1e1b33 0%, #0f111a 100%); }
+/* AUTH SCREEN */
+#auth {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 100vh; background: radial-gradient(circle at top right, #1e1b33 0%, #0a0b10 100%);
+}
+.auth-box {
+  background: var(--bg-card); padding: 40px; border-radius: 28px;
+  border: 1px solid var(--border); width: 90%; max-width: 380px;
+  backdrop-filter: blur(10px); text-align: center;
+}
 
-/* SIDEBAR INSPIRADA NO CANVA */
+/* APP LAYOUT */
+.app { display: none; height: 100vh; overflow: hidden; }
+
+/* SIDEBAR (Estilo Canva) */
 .sidebar {
-  width: 240px; flex-shrink: 0; background: rgba(26, 29, 41, 0.6);
-  backdrop-filter: blur(12px); border-right: 1px solid var(--border);
-  display: flex; flex-direction: column; padding: 24px 12px; gap: 8px;
+  width: 240px; background: var(--bg-sidebar); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; padding: 24px 12px; gap: 4px; flex-shrink: 0;
 }
-
 .sidebar-logo {
-  font-size: 15px; font-weight: 800; color: var(--accent);
-  padding: 0 12px 24px; letter-spacing: -0.5px;
-  text-transform: uppercase;
+  font-size: 14px; font-weight: 800; color: var(--accent);
+  padding: 10px 16px 30px; letter-spacing: 1px; text-transform: uppercase;
 }
-
 .tab {
-  display: flex; align-items:center; gap: 12px; padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
   cursor: pointer; border-radius: 12px; color: var(--text-dim);
-  font-size: 14px; font-weight: 500; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px; font-weight: 500; transition: all 0.2s;
+}
+.tab:hover { background: var(--glass); color: #fff; }
+.tab.active { background: var(--accent); color: #fff; box-shadow: 0 10px 15px -3px rgba(139, 92, 246, 0.3); }
+
+/* MAIN CONTENT */
+.main-content { flex: 1; overflow-y: auto; padding: 40px; background: #0d0f17; }
+.page { display: none; max-width: 900px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+/* CARDS (Estilo Lojong) */
+.section-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 24px; padding: 24px; margin-bottom: 24px;
 }
 
-.tab:hover { background: rgba(255,255,255,0.05); color: #fff; }
-.tab.active { background: var(--accent); color: #fff; box-shadow: var(--shadow-lg); }
+/* TABELAS E LISTAS */
+table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+th { text-align: left; color: var(--text-dim); font-size: 12px; text-transform: uppercase; padding: 12px; border-bottom: 1px solid var(--border); }
+td { padding: 14px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+.btn-del { background: none; border: none; color: var(--danger); cursor: pointer; opacity: 0.6; transition: 0.2s; }
+.btn-del:hover { opacity: 1; }
 
-/* GRID DE CARDS (Estilo Canva/Lojong) */
-.main-content { flex: 1; overflow-y: auto; padding: 40px; }
-.home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 24px; }
-
-.home-card {
-  background: var(--bg-card); border: 1px solid var(--border); border-radius: 24px;
-  padding: 32px 24px; cursor: pointer; transition: all 0.3s ease;
-  display: flex; flex-direction: column; gap: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.home-card:hover { 
-  transform: translateY(-8px); border-color: var(--accent); 
-  box-shadow: 0 20px 30px -10px rgba(139, 92, 246, 0.2); 
-}
-
-.hc-icon { 
-    width: 48px; height: 48px; background: var(--accent-soft); 
-    border-radius: 16px; display: flex; align-items: center; 
-    justify-content: center; font-size: 24px;
-}
-
-.hc-name { font-size: 16px; font-weight: 700; color: #fff; }
-.hc-desc { font-size: 13px; color: var(--text-dim); }
-
-/* BOTÕES E INPUTS */
-.btn {
-  background: var(--accent); color: #fff; border: none; border-radius: 14px;
-  padding: 12px 24px; font-weight: 600; cursor: pointer; transition: filter 0.2s;
-}
-.btn:hover { filter: brightness(1.1); }
-
+/* INPUTS E BOTÕES */
 input, select, textarea {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
-  border-radius: 14px; padding: 12px 16px; color: #fff; width: 100%;
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 16px; color: #fff; width: 100%;
+  margin-bottom: 12px; font-size: 14px;
+}
+.btn {
+  background: var(--accent); color: white; border: none; border-radius: 12px;
+  padding: 12px 20px; font-weight: 600; cursor: pointer; transition: 0.2s;
+}
+.btn:hover { background: var(--accent-hover); }
+
+/* TOAST */
+#toast {
+  position: fixed; bottom: 20px; right: 20px; padding: 12px 24px;
+  border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border);
+  display: none; z-index: 1000; animation: fadeIn 0.3s;
 }
 
-/* MOBILE ADAPTATION */
-@media(max-width: 768px) {
+@media (max-width: 768px) {
   .app { flex-direction: column; }
-  .sidebar { 
-    width: 100%; height: auto; flex-direction: row; order: 2; 
-    padding: 12px; overflow-x: auto; border-right: none; border-top: 1px solid var(--border);
-  }
-  .tab { flex-direction: column; font-size: 10px; padding: 8px; flex: 1; }
-  .sidebar-logo { display: none; }
+  .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; order: 2; padding: 10px; border-right: none; }
+  .tab { flex-direction: column; font-size: 10px; padding: 8px; min-width: 65px; }
+  .sidebar-logo, .tab span { display: none; }
   .main-content { padding: 20px; order: 1; }
 }
 </style>
 </head>
 <body>
 
+<div id="toast"></div>
+
+<div id="auth">
+  <div class="auth-box">
+    <h1 style="margin-bottom: 10px; font-size: 24px;">Mundinho</h1>
+    <p style="color: var(--text-dim); margin-bottom: 30px; font-size: 14px;">Seu ecossistema pessoal</p>
+    <input type="email" id="auth-email" placeholder="E-mail">
+    <input type="password" id="auth-pass" placeholder="Senha">
+    <button class="btn" style="width: 100%" onclick="signIn()">Entrar</button>
+    <p style="margin-top: 20px; font-size: 12px; color: var(--text-dim); cursor: pointer;" onclick="signUp()">Criar nova conta</p>
+  </div>
+</div>
+
 <div id="app-content" class="app">
   <nav class="sidebar">
     <div class="sidebar-logo">Mundinho</div>
-    <div class="tab active" onclick="showPage('home')">🏠 <span>Home</span></div>
-    <div class="tab" onclick="showPage('agenda')">📅 <span>Agenda</span></div>
-    <div class="tab" onclick="showPage('faculdade')">🎓 <span>Faculdade</span></div>
-    <div class="tab" onclick="showPage('finance')">💰 <span>Finanças</span></div>
-    <div class="tab" onclick="showPage('fitness')">💪 <span>Fitness</span></div>
-    <div class="tab" onclick="showPage('mental')">🧘 <span>Mental</span></div>
+    <div class="tab active" id="tab-home" onclick="showPage('home')">🏠 <span>Home</span></div>
+    <div class="tab" id="tab-agenda" onclick="showPage('agenda')">📅 <span>Agenda</span></div>
+    <div class="tab" id="tab-habitos" onclick="showPage('habitos')">✔ <span>Hábitos</span></div>
+    <div class="tab" id="tab-finance" onclick="showPage('finance')">💰 <span>Finanças</span></div>
+    <div class="tab" id="tab-fitness" onclick="showPage('fitness')">💪 <span>Fitness</span></div>
+    <div class="tab" id="tab-mental" onclick="showPage('mental')">🧘 <span>Mental</span></div>
+    <div class="tab" id="tab-faculdade" onclick="showPage('faculdade')">🎓 <span>Faculdade</span></div>
+    <div class="tab" id="tab-studio" onclick="showPage('studio')">🎨 <span>Studio</span></div>
+    <div style="margin-top: auto" class="tab" onclick="sb.auth.signOut()">🚪 <span>Sair</span></div>
   </nav>
 
   <main class="main-content">
+    
     <div id="page-home" class="page active">
-      <h1 style="font-size: 28px; margin-bottom: 8px;">Olá, Caico</h1>
-      <p style="color: var(--text-dim); margin-bottom: 40px;">Como está sua jornada hoje?</p>
-      
-      <div class="home-grid">
-        <div class="home-card" onclick="showPage('agenda')">
-          <div class="hc-icon">📅</div>
-          <div class="hc-info">
-            <div class="hc-name">Agenda</div>
-            <div class="hc-desc">Organize seus próximos passos e eventos.</div>
-          </div>
-        </div>
-        </div>
+      <h2 style="margin-bottom: 24px;">Olá, Caico</h2>
+      <div class="section-card">
+        <h3 style="margin-bottom: 16px; font-size: 16px;">Notas Rápidas</h3>
+        <input type="text" id="note-txt" placeholder="Algo em mente?">
+        <button class="btn" onclick="addNote()">Salvar Nota</button>
+        <div id="home-notes-list" style="margin-top: 20px;"></div>
+      </div>
     </div>
+
+    <div id="page-agenda" class="page">
+      <h2>Agenda</h2>
+      <div class="section-card">
+        <input type="text" id="agenda-desc" placeholder="O que agendar?">
+        <input type="date" id="agenda-date">
+        <button class="btn" onclick="addAgenda()">Agendar</button>
+      </div>
+      <div class="section-card" id="agenda-list"></div>
+    </div>
+
+    <div id="page-habitos" class="page">
+      <h2>Meus Hábitos</h2>
+      <div class="section-card">
+        <input type="text" id="habito-nome" placeholder="Nome do hábito...">
+        <button class="btn" onclick="addHabit()">Adicionar</button>
+      </div>
+      <div class="section-card" id="habitos-list"></div>
+    </div>
+
+    <div id="page-finance" class="page">
+      <h2>Finanças</h2>
+      <div class="section-card">
+        <div id="fin-total" style="font-size: 28px; font-weight: 800; color: var(--accent); margin-bottom: 20px;">R$ 0,00</div>
+        <input type="text" id="fin-desc" placeholder="Descrição">
+        <input type="number" id="fin-val" placeholder="Valor">
+        <select id="fin-type">
+          <option value="in">Entrada (+)</option>
+          <option value="out">Saída (-)</option>
+        </select>
+        <button class="btn" onclick="addFinance()">Registrar</button>
+      </div>
+      <div class="section-card" id="finance-list"></div>
+    </div>
+
+    <div id="page-fitness" class="page">
+      <h2>Fitness</h2>
+      <div class="section-card">
+        <input type="text" id="fit-ex" placeholder="Exercício">
+        <input type="text" id="fit-det" placeholder="Séries/Peso">
+        <button class="btn" onclick="addFitness()">Registrar Treino</button>
+      </div>
+      <div class="section-card" id="fitness-list"></div>
+    </div>
+
+    <div id="page-mental" class="page">
+      <h2>Mental</h2>
+      <div class="section-card">
+        <textarea id="mental-txt" placeholder="Como foi seu dia?" rows="4"></textarea>
+        <button class="btn" onclick="addMental()">Salvar Diário</button>
+      </div>
+      <div class="section-card" id="mental-list"></div>
+    </div>
+
+    <div id="page-faculdade" class="page">
+      <h2>Faculdade</h2>
+      <div class="section-card">
+        <input type="text" id="fac-materia" placeholder="Matéria">
+        <input type="text" id="fac-task" placeholder="Trabalho/Prova">
+        <input type="date" id="fac-deadline">
+        <button class="btn" onclick="addFaculdade()">Adicionar</button>
+      </div>
+      <div class="section-card" id="faculdade-list"></div>
+    </div>
+
+    <div id="page-studio" class="page">
+      <h2>Studio</h2>
+      <div class="section-card">
+        <h3>Projetos</h3>
+        <input type="text" id="studio-ag-desc" placeholder="Nome do projeto">
+        <input type="date" id="studio-ag-date">
+        <button class="btn" onclick="addStudioAgenda()">Agendar</button>
+      </div>
+      <div class="section-card" id="studio-agenda-list"></div>
+      <div class="section-card">
+        <h3>Notas de Criação</h3>
+        <textarea id="studio-note-txt" placeholder="Ideias..."></textarea>
+        <button class="btn" onclick="addStudioNote()">Salvar</button>
+        <div id="studio-notes-list"></div>
+      </div>
+    </div>
+
   </main>
 </div>
 
 <script>
-// Mantivemos a lógica funcional do seu Supabase, mas o render() 
-// agora deve focar em injetar os dados nas novas classes de card.
-function showPage(pageId) {
+// ========== CONFIGURAÇÃO SUPABASE ==========
+const SB_URL = "https://tflhckvukijjpimiwmla.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbGhja3Z1a2lqanBpbWl3bWxhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNTMwMjIsImV4cCI6MjA5MTkyOTAyMn0.xpJITssrIjnVCtFYTb7-UHt4ngDpz1yzM09wqm0vJqE";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+let cache = {
+  fitness:[], finance:[], mental:[], agenda:[], notes:[], habitos:[], faculdade:[], studio_agenda:[], studio_notes:[]
+};
+
+// ========== UI / NAVEGAÇÃO ==========
+function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + pageId).classList.add('active');
-  event.currentTarget.classList.add('active');
+  document.getElementById('page-'+id).classList.add('active');
+  const activeTab = Array.from(document.querySelectorAll('.tab')).find(t => t.innerText.toLowerCase().includes(id));
+  if(activeTab) activeTab.classList.add('active');
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.innerText = msg;
+  t.style.display = 'block';
+  t.style.borderColor = type === 'err' ? '#ef4444' : 'rgba(255,255,255,0.06)';
+  setTimeout(() => t.style.display = 'none', 3000);
+}
+
+// ========== LOGICA DB (SUA ORIGINAL) ==========
+async function saveToDB(table, obj) {
+  const { data, error } = await sb.from(table).insert([obj]).select();
+  if (error) { showToast('Erro ao salvar: ' + error.message, 'err'); return null; }
+  return data[0];
+}
+
+async function deleteFromDB(table, id) {
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) showToast('Erro ao deletar: ' + error.message, 'err');
+}
+
+async function loadAll() {
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) return;
+  const tables = ['fitness','finance','mental','agenda','notes','habitos','faculdade','studio_agenda','studio_notes'];
+  for (let t of tables) {
+    const { data } = await sb.from(t).select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+    cache[t] = data || [];
+  }
+  render();
+}
+
+// ========== ADICIONAR ITENS (ORIGINAL) ==========
+async function addFitness(){
+  const ex = document.getElementById('fit-ex').value;
+  const det = document.getElementById('fit-det').value;
+  if(!ex) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('fitness', { exercise:ex, details:det, user_id:user.id });
+  if(res){ cache.fitness.unshift(res); render(); }
+}
+
+async function addFinance(){
+  const d = document.getElementById('fin-desc').value;
+  const v = parseFloat(document.getElementById('fin-val').value);
+  const t = document.getElementById('fin-type').value;
+  if(!d || isNaN(v)) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('finance', { description:d, amount:v, type:t, user_id:user.id });
+  if(res){ cache.finance.unshift(res); render(); }
+}
+
+async function addMental(){
+  const txt = document.getElementById('mental-txt').value;
+  if(!txt) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('mental', { content:txt, user_id:user.id });
+  if(res){ cache.mental.unshift(res); render(); }
+}
+
+async function addAgenda(){
+  const desc = document.getElementById('agenda-desc').value;
+  const date = document.getElementById('agenda-date').value;
+  if(!desc) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('agenda', { description:desc, date:date, user_id:user.id });
+  if(res){ cache.agenda.unshift(res); render(); }
+}
+
+async function addNote(){
+  const txt = document.getElementById('note-txt').value;
+  if(!txt) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('notes', { content:txt, user_id:user.id });
+  if(res){ cache.notes.unshift(res); render(); }
+}
+
+async function addHabit(){
+  const n = document.getElementById('habito-nome').value;
+  if(!n) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('habitos', { name:n, user_id:user.id });
+  if(res){ cache.habitos.unshift(res); render(); }
+}
+
+async function addFaculdade(){
+  const m = document.getElementById('fac-materia').value;
+  const t = document.getElementById('fac-task').value;
+  const d = document.getElementById('fac-deadline').value;
+  if(!m) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('faculdade', { materia:m, task:t, deadline:d, user_id:user.id });
+  if(res){ cache.faculdade.unshift(res); render(); }
+}
+
+async function addStudioAgenda(){
+  const desc = document.getElementById('studio-ag-desc').value;
+  const date = document.getElementById('studio-ag-date').value;
+  if(!desc) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('studio_agenda', { description:desc, date:date, user_id:user.id });
+  if(res){ cache.studio_agenda.unshift(res); render(); }
+}
+
+async function addStudioNote(){
+  const txt = document.getElementById('studio-note-txt').value;
+  if(!txt) return;
+  const user = (await sb.auth.getUser()).data.user;
+  const res = await saveToDB('studio_notes', { content:txt, user_id:user.id });
+  if(res){ cache.studio_notes.unshift(res); render(); }
+}
+
+// ========== RENDERIZAÇÃO (ESTILO PREMIUM) ==========
+function render() {
+  // Notas Home
+  document.getElementById('home-notes-list').innerHTML = cache.notes.map((n, i) => 
+    `<div class="data-row" style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)">
+      <span>${n.content}</span>
+      <button class="btn-del" onclick="delItem('notes','${n.id}',${i})">✕</button>
+    </div>`).join('');
+
+  // Agenda
+  let agH = '<table>';
+  cache.agenda.forEach((it, i) => agH += `<tr><td>${it.description}</td><td>${it.date || ''}</td><td><button class="btn-del" onclick="delItem('agenda','${it.id}',${i})">✕</button></td></tr>`);
+  document.getElementById('agenda-list').innerHTML = agH + '</table>';
+
+  // Finanças
+  let finH = '<table>';
+  let total = 0;
+  cache.finance.forEach((it, i) => {
+    total += (it.type === 'in' ? it.amount : -it.amount);
+    finH += `<tr><td>${it.description}</td><td style="color:${it.type==='in'?'#4ade80':'#ef4444'}">R$ ${it.amount.toFixed(2)}</td><td><button class="btn-del" onclick="delItem('finance','${it.id}',${i})">✕</button></td></tr>`;
+  });
+  document.getElementById('finance-list').innerHTML = finH + '</table>';
+  document.getElementById('fin-total').innerText = `R$ ${total.toFixed(2)}`;
+
+  // Fitness
+  let fitH = '<table>';
+  cache.fitness.forEach((it, i) => fitH += `<tr><td>${it.exercise}</td><td>${it.details}</td><td><button class="btn-del" onclick="delItem('fitness','${it.id}',${i})">✕</button></td></tr>`);
+  document.getElementById('fitness-list').innerHTML = fitH + '</table>';
+
+  // Hábitos
+  document.getElementById('habitos-list').innerHTML = cache.habitos.map((it, i) => 
+    `<div class="data-row" style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border)">
+      <span>${it.name}</span>
+      <button class="btn-del" onclick="delItem('habitos','${it.id}',${i})">✕</button>
+    </div>`).join('');
+
+  // Faculdade
+  let facH = '<table>';
+  cache.faculdade.forEach((it, i) => facH += `<tr><td>${it.materia}</td><td>${it.task}</td><td>${it.deadline || ''}</td><td><button class="btn-del" onclick="delItem('faculdade','${it.id}',${i})">✕</button></td></tr>`);
+  document.getElementById('faculdade-list').innerHTML = facH + '</table>';
+
+  // Studio
+  let stAg = '<table>';
+  cache.studio_agenda.forEach((it, i) => stAg += `<tr><td>${it.description}</td><td>${it.date || ''}</td><td><button class="btn-del" onclick="delItem('studio_agenda','${it.id}',${i})">✕</button></td></tr>`);
+  document.getElementById('studio-agenda-list').innerHTML = stAg + '</table>';
+  
+  document.getElementById('studio-notes-list').innerHTML = cache.studio_notes.map((n, i) => 
+    `<div class="data-row" style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border)">
+      <span>${n.content}</span>
+      <button class="btn-del" onclick="delItem('studio_notes','${n.id}',${i})">✕</button>
+    </div>`).join('');
+    
+  // Mental
+  document.getElementById('mental-list').innerHTML = cache.mental.map((n, i) => 
+    `<div class="section-card" style="margin-top:10px; font-size:13px; border-color:var(--border)">
+      <div style="display:flex; justify-content:space-between">
+        <span>${new Date(n.created_at).toLocaleDateString()}</span>
+        <button class="btn-del" onclick="delItem('mental','${n.id}',${i})">✕</button>
+      </div>
+      <p style="margin-top:10px; color:var(--text-dim)">${n.content}</p>
+    </div>`).join('');
+}
+
+async function delItem(table, dbid, i) {
+  await deleteFromDB(table, dbid);
+  cache[table].splice(i, 1);
+  render();
+}
+
+// ========== AUTH ==========
+sb.auth.onAuthStateChange((event, session) => {
+  const authEl = document.getElementById('auth');
+  const appEl  = document.getElementById('app-content');
+  if (session) {
+    authEl.style.display = 'none';
+    appEl.style.display  = 'flex';
+    loadAll();
+  } else {
+    authEl.style.display = 'flex';
+    appEl.style.display  = 'none';
+  }
+});
+
+async function signUp() {
+  const email = document.getElementById('auth-email').value;
+  const password = document.getElementById('auth-pass').value;
+  const { error } = await sb.auth.signUp({ email, password });
+  if (error) showToast('❌ ' + error.message, 'err');
+  else showToast('✅ Conta criada! Verifique seu e-mail.');
+}
+
+async function signIn() {
+  const email = document.getElementById('auth-email').value;
+  const password = document.getElementById('auth-pass').value;
+  const { error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) showToast('❌ ' + error.message, 'err');
 }
 </script>
+
 </body>
 </html>
